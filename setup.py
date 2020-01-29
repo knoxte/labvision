@@ -14,6 +14,12 @@ setuptools.setup(
         exclude=('tests', 'docs')
     ),
     url='https://github.com/MikeSmithLabTeam/labvision',
-    
+    install_requires=[
+        'opencv-python',
+        'numpy',
+        'matplotlib',
+        'pillow',
+        'scipy'
+    ]
 )
 
