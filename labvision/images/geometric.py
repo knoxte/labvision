@@ -1,7 +1,8 @@
-from .__init__ import *
-
 import numpy as np
 import cv2
+
+from .basics import *
+from .colors import *
 
 __all__ = ['resize', 'rotate', 'hstack', 'vstack']
 
@@ -23,8 +24,8 @@ def resize(img, percent=25.0):
         The image after it's been resized
 
     """
-    width, height = get_width_and_height(img)
-    dim = (int(width * percent / 100), int(height * percent / 100))
+    w, h = width_and_height(img)
+    dim = (int(w * percent / 100), int(h * percent / 100))
     return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 
 
@@ -77,12 +78,12 @@ def hstack(*args):
 
     If image depths are mismatched then converts grayscale images to bgr before stacking
     """
-    depths = [get_depth(im) for im in args]
+    depths = [depth(im) for im in args]
     gray = [d == 1 for d in depths]
     if all(gray):
         return np.hstack(args)
     else:
-        ims = [gray_to_bgr(im) if get_depth(im) == 1 else im for im in args]
+        ims = [gray_to_bgr(im) if depth(im) == 1 else im for im in args]
         return np.hstack(ims)
 
 
@@ -92,7 +93,7 @@ def vstack(*args):
 
     If image depths are mismatched then converts grayscale images to bgr before stacking
     """
-    depths = [get_depth(im) for im in args]
+    depths = [depth(im) for im in args]
     gray = [d == 1 for d in depths]
     if all(gray):
         return np.vstack(args)

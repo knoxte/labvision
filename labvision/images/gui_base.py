@@ -1,11 +1,12 @@
 import tkinter as tk
 import random
 from PIL import Image, ImageTk
-from .__init__ import *
 import numpy as np
-import locale
 
-# locale.setlocale(locale.LC_NUMERIC, 'pl_PL.UTF8')
+from .basics import *
+from .colors import *
+from .geometric import *
+
 
 __all__ = [
     "ParamGui"

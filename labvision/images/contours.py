@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from scipy import optimize as op
 from math import pi, cos, sin
-from __init__ import *
+from .basics import *
 
 __all__ = [
     "find_contours",

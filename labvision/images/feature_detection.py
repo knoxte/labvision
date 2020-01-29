@@ -1,7 +1,9 @@
-from .__init__ import *
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+
+from .basics import *
+from .thresholding import *
 
 __all__ = [
     "find_connected_components",

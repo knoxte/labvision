@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
-from .__init__ import *
+
+from .colors import *
+from .basics import *
 
 __all__ = [
     'threshold',

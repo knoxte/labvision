@@ -1,6 +1,13 @@
-from .__init__ import *
 import cv2
 import numpy as np
+from .gui_base import *
+from .thresholding import *
+from .feature_detection import *
+from .draw import *
+from .colors import *
+from .smoothing import *
+from .contours import *
+
 
 __all__ = [
     "ThresholdGui",
@@ -254,10 +261,3 @@ class WatershedGui(ParamGui):
                                   mode=self.param_dict['invert'][0]
                                   )
         self._display_img(thresh, watershed_img)
-
-
-if __name__ == "__main__":
-    from images.basics import load
-
-    im = load("/home/ppxjd3/Pictures/hecx.png")
-    pg = ContoursGui(im)
