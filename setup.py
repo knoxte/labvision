@@ -19,7 +19,8 @@ setuptools.setup(
         'numpy',
         'matplotlib',
         'pillow',
-        'scipy'
+        'scipy',
+        'slicerator'
     ]
 )
 

@@ -1,6 +1,7 @@
 import os
 import cv2
 import numpy as np
+from slicerator import Slicerator
 from .. import images
 
 __all__ = [
@@ -12,7 +13,7 @@ class WriteVideo:
 
     def __init__(
             self, 
-            filename=None, 
+            filename,
             frame_size=None, 
             frame=None,
             fps=50.0, 
@@ -34,6 +35,8 @@ class WriteVideo:
             fps,
             (self.frame_size[1], self.frame_size[0]))
 
+        assert self.vid.isOpened(), 'Video failed to open'
+
     def __enter__(self):
         return self
 
@@ -48,6 +51,7 @@ class WriteVideo:
         self.vid.write(im)
 
 
+@Slicerator.from_class
 class ReadVideo:
 
     def __init__(self, filename=None, grayscale=False, return_function=None):
@@ -97,7 +101,7 @@ class ReadVideo:
 
         self.file_extension = self.filename.split('.')[1]
 
-    def read(self):
+    def read_next_frame(self):
         ret, im = self.vid.read()
         self.frame_num += 1
 
@@ -111,9 +115,19 @@ class ReadVideo:
         else:
             raise Exception('Cannot read frame')
 
+    def read_frame(self, n):
+        self.set_frame(n)
+        return self.read_next_frame()
+
     def set_frame(self, n):
-        if self.filetype == 'video':
+        if n != self.frame_num:
             self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
-        self.frame_num = n
+            self.frame_num = n
+
+    def __getitem__(self, item):
+        return self.read_frame(item)
+
+    def __len__(self):
+        return self.num_frames
 
 
