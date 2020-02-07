@@ -21,6 +21,7 @@ setuptools.setup(
         'pillow',
         'scipy',
         'slicerator',
+        'ffmpeg-python'
     ],
     test_suite='nose.collector',
     tests_require=['nose'],
