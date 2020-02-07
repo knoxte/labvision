@@ -20,7 +20,9 @@ setuptools.setup(
         'matplotlib',
         'pillow',
         'scipy',
-        'slicerator'
-    ]
+        'slicerator',
+    ],
+    test_suite='nose.collector',
+    tests_require=['nose'],
 )
 

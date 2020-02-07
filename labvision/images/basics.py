@@ -24,6 +24,7 @@ __all__ = [
 
 class Displayer:
     def __init__(self, window_name, resolution=(1280, 720)):
+        self.active = True
         self.window_name = window_name
         cv2.namedWindow(self.window_name, cv2.WINDOW_KEEPRATIO)
         cv2.resizeWindow(self.window_name, *resolution)
@@ -31,7 +32,8 @@ class Displayer:
     def update_im(self, im):
         cv2.imshow(self.window_name, im)
         if cv2.waitKey(100) & 0xFF == ord('q'):
-            pass
+            self.active = False
+            cv2.destroyAllWindows()
 
 
 def mean(ims):
