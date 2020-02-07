@@ -63,7 +63,7 @@ def to_uint8(im):
     return np.uint8(im)
 
 
-def read_img(filepath, flag=1):
+def read_img(filepath, grayscale=False, alpha=False):
     """
     Reads an image from a filepath.
 
@@ -87,6 +87,13 @@ def read_img(filepath, flag=1):
         Color images will have channels stored in BGR order
 
     """
+    assert grayscale * alpha == 0, 'Only one of alpha and grayscale can be True'
+    if grayscale:
+        flag = 0
+    elif alpha:
+        flag = -1
+    else:
+        flag = 1
     img = cv2.imread(filepath, flag)
     return img
 
