@@ -9,3 +9,4 @@ from .gui import *
 from .feature_detection import *
 from .smoothing import *
 from .contours import *
+from .morphological import *
