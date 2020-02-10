@@ -105,12 +105,18 @@ class CropPolygon:
         self.frame.pack()
         label = tk.Label(self.frame, text="Click to add points to the polygon")
         label.pack()
-        self.canvas = tk.Canvas(self.frame, width=im.shape[0],
-                                height=im.shape[1])
+        width = 1280
+        height = 720
+        self.canvas = tk.Canvas(self.frame, width=width,
+                                height=height)
         self.polygon = self.canvas.create_polygon([0, 0], outline='black',
                                                   width=2)
         self.canvas.pack()
-        image = ImageTk.PhotoImage(Image.fromarray(im))
+        image = Image.fromarray(im)
+        self.h_ratio = image.height / 720
+        self.w_ratio = image.width / 1280
+        image = image.resize((1280, 720))
+        image = ImageTk.PhotoImage(image)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=image)
         self.canvas.bind("<Button-1>", self.mouse1_callback)
         self.canvas.bind("<Button-2>", self.mouse2_callback)
@@ -151,10 +157,12 @@ class CropPolygon:
     def finish(self):
         points = np.array(self.points)
         points = points.reshape(len(points) // 2, 2)
+        points[:, 0] = points[:, 0] * self.w_ratio
+        points[:, 1] = points[:, 1] * self.h_ratio
         mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
         cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
                      color=(255, 255, 255))
-        bbox = BBox(min(points[:, 0]), max(points[:, 1]), min(points[:, 1]),
+        bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
         self.result = CropResult(bbox, mask, points=points)
         self.master.quit()
