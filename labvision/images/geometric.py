@@ -82,6 +82,8 @@ def hstack(*args):
     gray = [d == 1 for d in depths]
     if all(gray):
         return np.hstack(args)
+    elif not all(gray):
+        return np.hstack(args)
     else:
         ims = [gray_to_bgr(im) if depth(im) == 1 else im for im in args]
         return np.hstack(ims)
@@ -98,5 +100,5 @@ def vstack(*args):
     if all(gray):
         return np.vstack(args)
     else:
-        ims = [gray_to_bgr(im) for im in args]
+        ims = [gray_to_bgr(im) if depth(im) == 1 else im for im in args]
         return np.vstack(ims)
