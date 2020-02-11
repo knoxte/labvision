@@ -164,6 +164,8 @@ class CropPolygon:
                      color=(255, 255, 255))
         bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
+        points[:, 0] -= bbox.xmin
+        points[:, 1] -= bbox.ymin
         self.result = CropResult(bbox, mask, points=points)
         self.master.quit()
 
