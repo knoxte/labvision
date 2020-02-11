@@ -168,6 +168,7 @@ class CropPolygon:
         points[:, 1] -= bbox.ymin
         self.result = CropResult(bbox, mask, points=points)
         self.master.quit()
+        self.master.destroy()
 
     def reset(self):
         self.points = []
