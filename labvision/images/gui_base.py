@@ -15,11 +15,14 @@ __all__ = [
 
 class ParamGui:
 
-    def __init__(self, img_or_vid, num_imgs=1):
+    def __init__(self, img_or_vid, num_imgs=1, scale=1):
+        self.scale = scale
         self.num_imgs = num_imgs
         self._file_setup(img_or_vid)
         self.im0 = self.im.copy()
-        self.width, self.height = self.im.shape[:2]
+        self.height, self.width = self.im0.shape[:2]
+        self.width = int(self.width * self.scale)
+        self.height = int(self.height * self.scale)
         if self.num_imgs == 2:
             self.width *= 2.1
 
@@ -48,8 +51,8 @@ class ParamGui:
         self.frame.pack()
         self.canvas = tk.Canvas(self.frame, width=self.width,
                                 height=self.height)
-
-        image = ImageTk.PhotoImage(Image.fromarray(self.im))
+        im = Image.fromarray(self.im).resize((self.width, self.height))
+        image = ImageTk.PhotoImage(im)
         self.canvas_image = self.canvas.create_image(0, 0, anchor=tk.NW,
                                                      image=image)
         self.image = image
@@ -124,7 +127,8 @@ class ParamGui:
         self.update_im()
 
     def update_im(self):
-        self.image = ImageTk.PhotoImage(Image.fromarray(self.im))
+        im = Image.fromarray(self.im).resize((self.width, self.height))
+        self.image = ImageTk.PhotoImage(im)
         self.canvas.itemconfig(self.canvas_image, image=self.image)
 
     def _display_img(self, *ims):

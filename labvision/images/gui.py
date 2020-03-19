@@ -39,7 +39,7 @@ class ThresholdGui(ParamGui):
 
 
 class CircleGui(ParamGui):
-    def __init__(self, img):
+    def __init__(self, img, scale=1):
         self.grayscale = True
         self.param_dict = {
             'distance': [25, 3, 51, 2],
@@ -48,7 +48,7 @@ class CircleGui(ParamGui):
             'min_rad': [17, 3, 50, 1],
             'max_rad': [19, 3, 50, 1]
         }
-        ParamGui.__init__(self, img)
+        ParamGui.__init__(self, img, scale=scale)
 
     def update(self):
         circles = find_circles(self.im0, self.param_dict['distance'][0],
