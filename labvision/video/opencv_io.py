@@ -101,6 +101,16 @@ class ReadVideo:
 
         self.file_extension = self.filename.split('.')[1]
 
+    def read_frame(self, n=None):
+        if n is not None:
+            self.set_frame(n)
+        return self.read_next_frame()
+
+    def set_frame(self, n):
+        if n != self.frame_num:
+            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
+            self.frame_num = n
+
     def read_next_frame(self):
         ret, im = self.vid.read()
         self.frame_num += 1
@@ -115,17 +125,8 @@ class ReadVideo:
         else:
             raise Exception('Cannot read frame')
 
-    def read_frame(self, n):
-        self.set_frame(n)
-        return self.read_next_frame()
-
-    def set_frame(self, n):
-        if n != self.frame_num:
-            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
-            self.frame_num = n
-
-    def __getitem__(self, item):
-        return self.read_frame(item)
+    def __getitem__(self, frame_num):
+        return self.read_frame(n=frame_num)
 
     def __len__(self):
         return self.num_frames
