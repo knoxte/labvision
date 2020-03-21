@@ -37,18 +37,19 @@ class WriteVideo:
 
         assert self.vid.isOpened(), 'Video failed to open'
 
+    def add_frame(self, im):
+        assert np.shape(im) == self.frame_size, "Added frame is wrong shape"
+        self.vid.write(im)
+
+    def close(self):
+        self.vid.release()
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
 
-    def close(self):
-        self.vid.release()
-
-    def add_frame(self, im):
-        assert np.shape(im) == self.frame_size, "Added frame is wrong shape"
-        self.vid.write(im)
 
 
 @Slicerator.from_class
@@ -61,12 +62,6 @@ class ReadVideo:
         self._detect_file_type()
         self.init_video()
         self.get_vid_props()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
 
     def close(self):
         if self.filetype == 'video':
@@ -130,5 +125,11 @@ class ReadVideo:
 
     def __len__(self):
         return self.num_frames
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 
