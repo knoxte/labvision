@@ -8,13 +8,15 @@ import os
 class Camera:
     def __init__(
             self,
-            cam_num,
+            cam_num=None,
             cam_type=LOGITECH_HD_1080P,
             frame_size=None,
             fps=None,
     ):
+        if cam_num is None:
+            cam_num = guess_camera_number()
+
         self.cam = cv2.VideoCapture(cam_num)
-        cam_type = cam_type
 
         frame_sizes = cam_type['res']
         frame_rates = cam_type['fps']
@@ -40,11 +42,17 @@ class Camera:
         ret, frame = self.cam.read()
         assert ret, 'Frame Reading Error'
 
-    def __enter__(self):
-        return self
+    def get_frame(self):
+        ret, frame = self.cam.read()
+        return frame
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
+    def save_frame(self, filename):
+        ret, frame = self.cam.read()
+        save(frame, filename)
+
+    def show_frame(self):
+        ret, frame = self.cam.read()
+        display(frame, 'Current frame')
 
     def preview(self):
         window = Displayer('Camera')
@@ -73,18 +81,6 @@ class Camera:
                 raise CamPropsError(property, True)
         except AssertionError:
             raise CamPropsError(property, False)
-
-    def get_frame(self):
-        ret, frame = self.cam.read()
-        return frame
-
-    def save_frame(self, filename):
-        ret, frame = self.cam.read()
-        save(frame, filename)
-
-    def show_frame(self):
-        ret, frame = self.cam.read()
-        display(frame, 'Current frame')
 
     def get_props(self, show=False):
         self.width = self.cam.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -149,6 +145,12 @@ class Camera:
 
     def close(self):
         self.cam.release()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
 
 def guess_camera_number():
