@@ -54,7 +54,48 @@ class WriteVideo:
 
 @Slicerator.from_class
 class ReadVideo:
+    """Reading Videos class that implements OpenCv.
 
+    inputs:
+    filename = full path to file, accepts .mp4,.MP4','.m4v','.avi'
+    grayscale = true : loads img in grayscale
+    frame_range = (startframe, stopframe, step)
+
+    methods:
+    .read_frame(n=framenumber) : calls frame specified by n. if no argument supplied
+                                calls next available frame. Returns image
+    .set_frame(n)              : moves video to specified frame number but doesn't return
+    .read_next_frame()         : retained as legacy method but treat as hidden
+    .get_vid_props()           : retrieves video properties which are stored as class attributes
+                                [framenum, numframes, current_time, width, height, colour, frame_size,
+                                fps, format, codec, file_extension]
+
+    ReadVideo supports usage as a getter:
+
+    Example:
+        read_vid = ReadVideo(filename)
+        img = read[4]   # returns frame 4
+
+    ReadVideo supports usage as a generator:
+
+    Example:
+        for img in ReadVideo(filename, range=(5,20,4)):
+            labvision.images.basics.display(img) # displays images 5,9,13,17
+
+
+
+
+
+
+
+    Properties created with the ``@property`` decorator should be documented
+    in the property's getter method.
+
+    Attributes:
+        attr1 (str): Description of `attr1`.
+        attr2 (:obj:`int`, optional): Description of `attr2`.
+
+    """
     def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
         self.filename = filename
         self.grayscale = grayscale
@@ -62,6 +103,7 @@ class ReadVideo:
         self.return_func = return_function
         self._detect_file_type()
         self.init_video()
+        self.set_frame(frame_range[0])
         self.get_vid_props()
 
     def close(self):
@@ -100,13 +142,9 @@ class ReadVideo:
     def read_frame(self, n=None):
         if n is None:
             return self.read_next_frame()
-
-        assert (n >= self.frame_range[0]) & (n < self.frame_range[1]) \
-                    & ((n-self.frame_range[0]) % self.frame_range[2] == 0)\
-                    , 'Frame not in frame_range'
-
-        self.set_frame(n)
-        return self.read_next_frame()
+        else:
+            self.set_frame(n)
+            return self.read_next_frame()
 
     def set_frame(self, n):
         if n != self.frame_num:
@@ -114,6 +152,12 @@ class ReadVideo:
             self.frame_num = n
 
     def read_next_frame(self):
+        print(self.frame_num)
+        assert (self.frame_num >= self.frame_range[0]) & \
+               (self.frame_num < self.frame_range[1]) & \
+               ((self.frame_num - self.frame_range[0]) % self.frame_range[2] == 0),\
+                'Frame not in range'
+
         ret, im = self.vid.read()
         self.frame_num += self.frame_range[2]
         if self.frame_range[2] != 1:
@@ -142,8 +186,10 @@ class ReadVideo:
         return self
 
     def __next__(self):
-        if
-        return self.read_frame()
+        if self.frame_num < self.frame_range[1]:
+            return self.read_frame()
+        else:
+            raise StopIteration
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
