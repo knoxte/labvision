@@ -90,38 +90,38 @@ def crop_circle(im):
     return crop_object.result
 
 
-class CropPolygon:
-    """Take an interactive crop of a shape"""
+class CropBase:
 
     def __init__(self, im):
         self.im = im
         self.points = []
         self.setup(im)
 
-    def setup(self, im):
+    def setup(self, im, width=1280, height=720):
         self.master = tk.Tk()
-        self.master.wm_title("Crop Polygon")
+        self.master.wm_title("Crop")
         self.frame = tk.Frame(self.master)
         self.frame.pack()
-        label = tk.Label(self.frame, text="Click to add points to the polygon")
+        label = tk.Label(self.frame, text="Click to add points")
         label.pack()
-        width = 1280
-        height = 720
+
         self.canvas = tk.Canvas(self.frame, width=width,
                                 height=height)
-        self.polygon = self.canvas.create_polygon([0, 0], outline='black',
-                                                  width=2)
+        self.shape = self.create_shape()
         self.canvas.pack()
+
         image = Image.fromarray(im)
-        self.h_ratio = image.height / 720
-        self.w_ratio = image.width / 1280
-        image = image.resize((1280, 720))
+        self.h_ratio = image.height / height
+        self.w_ratio = image.width / width
+        image = image.resize((width, height))
         image = ImageTk.PhotoImage(image)
+
         self.canvas.create_image(0, 0, anchor=tk.NW, image=image)
         self.canvas.bind("<Button-1>", self.mouse1_callback)
         self.canvas.bind("<Button-2>", self.mouse2_callback)
         self.canvas.bind("<Button-3>", self.mouse3_callback)
         self.master.bind("<Return>", self.return_callback)
+
         undo_button = tk.Button(self.frame, text='Undo (Right Click)',
                                 command=self.undo)
         undo_button.pack(side=tk.LEFT, fill=tk.BOTH)
@@ -132,6 +132,29 @@ class CropPolygon:
                                  command=self.reset)
         reset_button.pack(side=tk.LEFT, fill=tk.BOTH)
         tk.mainloop()
+
+    def undo(self):
+        if len(self.points) == 2:
+            self.reset()
+        elif len(self.points) > 2:
+            self.points.pop()
+            self.points.pop()
+            self.canvas.delete(self.shape)
+            self.shape = self.create_shape(self.points)
+
+    def reset(self):
+        self.points = []
+        self.canvas.delete(self.shape)
+        self.shape = self.create_shape()
+
+    def finish(self):
+        self.finish_crop()
+        self.master.quit()
+        self.master.destroy()
+
+    def update(self,x,y):
+        #stub to be implemented in child
+        pass
 
     def mouse1_callback(self, event):
         x = event.x
@@ -147,143 +170,93 @@ class CropPolygon:
     def return_callback(self, event):
         self.finish()
 
+
+class CropRect(CropBase):
+    def __init__(self,im):
+        super(CropRect, self).__init__(im)
+
+    def create_shape(self, points=[0, 0, 0, 0]):
+        return self.canvas.create_rectangle(points, outline='black',
+                                          width=2)
+
     def update(self, x, y):
+        self.canvas.delete(self.shape)
+        #self.shape = self.create_shape(self.points)
+        #if len(self.points) < 4:
         self.points.append(x)
         self.points.append(y)
-        self.canvas.delete(self.polygon)
-        self.polygon = self.canvas.create_polygon(self.points, outline='black',
-                                                  width=2)
 
-    def finish(self):
+        if len(self.points) == 4:
+            self.shape = self.create_shape(self.points)
+
+    def finish_crop(self):
+        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
         points = np.array(self.points)
         points = points.reshape(len(points) // 2, 2)
         points[:, 0] = points[:, 0] * self.w_ratio
         points[:, 1] = points[:, 1] * self.h_ratio
-        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
-        cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
-                     color=(255, 255, 255))
         bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
         points[:, 0] -= bbox.xmin
         points[:, 1] -= bbox.ymin
+        cv2.rectangle(mask, (points[0,0], points[0,1]),(points[1,0], points[1,1]),
+                     color=(255, 255, 255), thickness=-1)
         self.result = CropResult(bbox, mask, points=points)
-        self.master.quit()
-        self.master.destroy()
 
-    def reset(self):
-        self.points = []
-        self.canvas.delete(self.polygon)
-        self.polygon = self.canvas.create_polygon([0, 0], outline='black',
+
+class CropPolygon(CropBase):
+    def __init__(self,im):
+        super(CropPolygon, self).__init__(im)
+
+    def create_shape(self, points=[0,0]):
+        return self.canvas.create_polygon(points, outline='black',
                                                   width=2)
 
-    def undo(self):
-        if len(self.points) == 2:
-            self.reset()
-        elif len(self.points) > 2:
-            self.points.pop()
-            self.points.pop()
-            self.canvas.delete(self.polygon)
-            self.polygon = self.canvas.create_polygon(self.points,
-                                                      outline='black', width=2)
+    def update(self, x, y):
+        self.points.append(x)
+        self.points.append(y)
+        self.canvas.delete(self.shape)
+        self.shape = self.create_shape(self.points)
 
-
-class CropCircle:
-
-    def __init__(self, im):
-        self.im = im
-        self.x = []
-        self.y = []
-        self.setup()
-
-    def setup(self):
-        self.master = tk.Tk()
-        self.master.wm_title("Crop Circle")
-        self.frame = tk.Frame(self.master)
-        self.frame.pack()
-        label = tk.Label(self.frame, text="Click three points on the circle")
-        label.pack()
-
-        self.canvas = tk.Canvas(self.frame, width=self.im.shape[0],
-                                height=self.im.shape[1])
-        self.canvas.bind("<Button-1>", self.mouse1_callback)
-        self.canvas.bind("<Button-2>", self.mouse2_callback)
-        self.canvas.bind("<Button-3>", self.mouse3_callback)
-        self.master.bind("<Return>", self.return_callback)
-        self.circle = self.canvas.create_oval([0, 0, 0, 0], outline='black',
-                                              width=2)
-        self.selections = []
-        self.canvas.pack()
-        image = ImageTk.PhotoImage(Image.fromarray(self.im))
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=image)
-        undo_button = tk.Button(self.frame, text='Undo (Right Click)',
-                                command=self.undo)
-        undo_button.pack(side=tk.LEFT)
-        finished_button = tk.Button(self.frame, text='Finished (Return)',
-                                    command=self.finish)
-        finished_button.pack(side=tk.LEFT, fill=tk.BOTH)
-        reset_button = tk.Button(self.frame, text='Reset (Middle Click)',
-                                 command=self.reset)
-        reset_button.pack(side=tk.LEFT)
-        tk.mainloop()
-
-    def finish(self):
+    def finish_crop(self):
         mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
-        cv2.circle(mask, (int(self.xc), int(self.yc)), int(self.r),
-                   [255, 255, 255], thickness=-1)
-        bbox = BBox(int(self.xc - self.r), int(self.xc + self.r),
-                    int(self.yc - self.r), int(self.yc + self.r))
-        points = [self.xc, self.yc, self.r]
-        self.result = CropResult(bbox, mask, circle=points)
-        self.master.quit()
+        points = np.array(self.points)
+        points = points.reshape(len(points) // 2, 2)
+        points[:, 0] = points[:, 0] * self.w_ratio
+        points[:, 1] = points[:, 1] * self.h_ratio
+        bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
+                    max(points[:, 1]))
+        points[:, 0] -= bbox.xmin
+        points[:, 1] -= bbox.ymin
+        cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
+                     color=(255, 255, 255))
+        self.result = CropResult(bbox, mask, points=points)
 
-    def reset(self):
-        self.x = []
-        self.y = []
-        self.canvas.delete(self.circle)
-        if len(self.selections) > 0:
-            for selection in self.selections:
-                self.canvas.delete(selection)
 
-    def undo(self):
-        if len(self.x) > 0:
-            self.x.pop()
-            self.y.pop()
-            selection = self.selections.pop()
-            self.canvas.delete(selection)
-            if len(self.x) == 2:
-                self.canvas.delete(self.circle)
+class CropCircle(CropBase):
+    def __init__(self, im):
+        self.selections = []
+        super(CropCircle, self).__init__(im)
 
-    def mouse1_callback(self, event):
-        x = event.x
-        y = event.y
-        if len(self.x) < 3:
-            self.x.append(x)
-            self.y.append(y)
+    def create_shape(self, points=[0,0,0,0]):
+        return self.canvas.create_oval(points, outline='black',
+                                              width=2)
+    def update(self, x, y):
+        if len(self.points) < 6:
+            self.points.append(x)
+            self.points.append(y)
             self.selections.append(
                 self.canvas.create_oval([x - 2, y - 2, x + 2, y + 2],
                                         outline='red', width=2))
-        if len(self.x) == 3:
-            self.update()
-
-    def mouse2_callback(self, event):
-        self.reset()
-
-    def mouse3_callback(self, event):
-        self.undo()
-
-    def return_callback(self, event):
-        self.finish()
-
-    def update(self):
-        xc, yc, r = self.find_circle()
-        self.circle = self.canvas.create_oval([xc - r, yc - r, xc + r, yc + r],
-                                              outline='black', width=2)
-        self.xc, self.yc, self.r = xc, yc, r
+        if len(self.points) == 6:
+            xc, yc, r = self.find_circle()
+            self.shape = self.create_shape([xc - r, yc - r, xc + r, yc + r])
+            self.xc, self.yc, self.r = xc, yc, r
 
     def find_circle(self):
         "http://www.ambrsoft.com/trigocalc/circle3d.htm"
-        x1, x2, x3 = self.x
-        y1, y2, y3 = self.y
+        x1,y1,x2,y2,x3,y3 = self.points
+
         A = np.linalg.det([[x1, y1, 1], [x2, y2, 1], [x3, y3, 1]])
         B = -np.linalg.det(
             [[x1 ** 2 + y1 ** 2, y1, 1], [x2 ** 2 + y2 ** 2, y2, 1],
@@ -300,6 +273,15 @@ class CropCircle:
         r = np.sqrt((B ** 2 + C ** 2 - 4 * A * D) / (4 * A ** 2))
         return x0, y0, r
 
+    def finish_crop(self):
+        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
+        cv2.circle(mask, (int(self.xc), int(self.yc)), int(self.r),
+                   [255, 255, 255], thickness=-1)
+        bbox = BBox(int(self.xc - self.r), int(self.xc + self.r),
+                    int(self.yc - self.r), int(self.yc + self.r))
+        points = [self.xc, self.yc, self.r]
+        self.result = CropResult(bbox, mask, circle=points)
+        self.master.quit()
 
 class CropResult:
 
@@ -307,6 +289,8 @@ class CropResult:
         self.bbox = bbox
         self.mask = mask
         self.points = points
+        if circle is not None:
+            self.circle = circle
 
     def __str__(self):
         return str(
