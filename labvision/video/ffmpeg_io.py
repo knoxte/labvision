@@ -40,8 +40,14 @@ class ReadVideoFFMPEG:
         self.height = int(video_info['height'])
         self.num_frames = int(video_info['nb_frames'])
 
-    def __getitem__(self, item):
-        return self.read_frame()
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            return self.read_frame()
+        except IndexError:
+            raise StopIteration
 
     def __len__(self):
         return self.num_frames
