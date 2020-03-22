@@ -10,7 +10,27 @@ __all__ = [
 ]
 
 class WriteVideo:
+    """WriteVideo writes images to file with OpenCv
 
+    inputs:
+    filename : full path to file, accepts .mp4,.MP4','.m4v','.avi'
+    frame_size : tuple (height, width) - Same order as np.shape
+    frame : example image to be saved
+    fps : frames per second playback of video
+    codec : to encode file
+
+    methods:
+    .add_frame(img) : adds image to object
+    .close() : releases resources
+
+    WriteVideo can be used with "with"
+
+    Example:
+    with WriteVideo as writevid:
+        do stuff
+
+
+    """
 
     def __init__(
             self, 
@@ -58,9 +78,9 @@ class ReadVideo:
     """Reading Videos class that implements OpenCv.
 
     inputs:
-    filename = full path to file, accepts .mp4,.MP4','.m4v','.avi'
-    grayscale = true : loads img in grayscale
-    frame_range = (startframe, stopframe, step)
+    filename : full path to file, accepts .mp4,.MP4','.m4v','.avi'
+    grayscale : true : loads img in grayscale
+    frame_range : (startframe, stopframe, step)
 
     methods:
     .read_frame(n=framenumber) : calls frame specified by n. if no argument supplied
@@ -71,11 +91,14 @@ class ReadVideo:
                                 [framenum, numframes, current_time, width, height, colour, frame_size,
                                 fps, format, codec, file_extension]
 
+    returns:
+    Image - grayscale or colour depending on selection in __init__
+
     ReadVideo supports usage as a getter:
 
     Example:
         read_vid = ReadVideo(filename)
-        img = read[4]   # returns frame 4
+        img = read[4]   # returns frame at index 4
 
     ReadVideo supports usage as a generator:
 
@@ -88,18 +111,6 @@ class ReadVideo:
     Example:
         with ReadVideo() as readvid:
             Do stuff
-
-
-
-
-
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
 
     """
     def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
