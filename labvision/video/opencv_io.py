@@ -11,6 +11,7 @@ __all__ = [
 
 class WriteVideo:
 
+
     def __init__(
             self, 
             filename,
@@ -82,6 +83,11 @@ class ReadVideo:
         for img in ReadVideo(filename, range=(5,20,4)):
             labvision.images.basics.display(img) # displays images 5,9,13,17
 
+    ReadVideo supports "with" usage. This basically means no need to call .close():
+
+    Example:
+        with ReadVideo() as readvid:
+            Do stuff
 
 
 
@@ -99,16 +105,15 @@ class ReadVideo:
     def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
         self.filename = filename
         self.grayscale = grayscale
-        self.frame_range = frame_range
-        self.return_func = return_function
         self._detect_file_type()
         self.init_video()
-        self.set_frame(frame_range[0])
         self.get_vid_props()
 
-    def close(self):
-        if self.filetype == 'video':
-            self.vid.release()
+        self.frame_range = (frame_range[0], self.num_frames, frame_range[2]) if (frame_range[1] == None) else frame_range
+        self.frame_num = self.frame_range[0]
+        self.set_frame(self.frame_num)
+
+        self.return_func = return_function
 
     def _detect_file_type(self):
         self.ext = os.path.splitext(self.filename)[1]
@@ -118,7 +123,6 @@ class ReadVideo:
             raise NotImplementedError('File extension is not implemented')
 
     def init_video(self):
-        self.frame_num = 0
         self.vid = cv2.VideoCapture(self.filename)
 
     def get_vid_props(self):
@@ -152,7 +156,6 @@ class ReadVideo:
             self.frame_num = n
 
     def read_next_frame(self):
-        print(self.frame_num)
         assert (self.frame_num >= self.frame_range[0]) & \
                (self.frame_num < self.frame_range[1]) & \
                ((self.frame_num - self.frame_range[0]) % self.frame_range[2] == 0),\
@@ -173,14 +176,15 @@ class ReadVideo:
         else:
             raise Exception('Cannot read frame')
 
+    def close(self):
+        if self.filetype == 'video':
+            self.vid.release()
+
     def __getitem__(self, frame_num):
         return self.read_frame(n=frame_num)
 
     def __len__(self):
         return self.num_frames
-
-    def __enter__(self):
-        return self
 
     def __iter__(self):
         return self
@@ -190,6 +194,9 @@ class ReadVideo:
             return self.read_frame()
         else:
             raise StopIteration
+
+    def __enter__(self):
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
