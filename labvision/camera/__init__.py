@@ -142,7 +142,6 @@ class Camera:
         self.set_property('hue', self.hue)
         self.set_property('exposure', self.exposure)
 
-
     def close(self):
         self.cam.release()
 

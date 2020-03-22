@@ -55,9 +55,10 @@ class WriteVideo:
 @Slicerator.from_class
 class ReadVideo:
 
-    def __init__(self, filename=None, grayscale=False, return_function=None):
+    def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
         self.filename = filename
         self.grayscale = grayscale
+        self.frame_range = frame_range
         self.return_func = return_function
         self._detect_file_type()
         self.init_video()
@@ -97,8 +98,14 @@ class ReadVideo:
         self.file_extension = self.filename.split('.')[1]
 
     def read_frame(self, n=None):
-        if n is not None:
-            self.set_frame(n)
+        if n is None:
+            return self.read_next_frame()
+
+        assert (n >= self.frame_range[0]) & (n < self.frame_range[1]) \
+                    & ((n-self.frame_range[0]) % self.frame_range[2] == 0)\
+                    , 'Frame not in frame_range'
+
+        self.set_frame(n)
         return self.read_next_frame()
 
     def set_frame(self, n):
@@ -108,7 +115,9 @@ class ReadVideo:
 
     def read_next_frame(self):
         ret, im = self.vid.read()
-        self.frame_num += 1
+        self.frame_num += self.frame_range[2]
+        if self.frame_range[2] != 1:
+            self.set_frame(self.frame_num)
 
         if ret:
             if self.grayscale:
@@ -128,6 +137,13 @@ class ReadVideo:
 
     def __enter__(self):
         return self
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if
+        return self.read_frame()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
