@@ -11,17 +11,11 @@ and store images / video.
 
 Contents
 --------
-
 .. toctree::
-    :maxdepth: 2
-
-
-
-
-
-
-
-
+   :maxdepth: 2
+   :ref:`camera'
+   :ref:`images'
+   :ref:`video'
 
 Indices and tables
 ==================
