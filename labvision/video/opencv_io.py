@@ -112,6 +112,7 @@ class ReadVideo:
         with ReadVideo() as readvid:
             Do stuff
 
+
     """
     def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
         self.filename = filename

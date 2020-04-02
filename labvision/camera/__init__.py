@@ -1,2 +1,2 @@
 from .camera import *
-from .settings import *
+from .camera_config import *

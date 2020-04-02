@@ -294,7 +294,7 @@ class CropResult:
 
     def __str__(self):
         return str(
-            "Crop result containing: \n "
+            "Crop result containing where appropriate: \n "
             "   bbox: BBox object containing xmin, xmax, ymin, ymax attributes \n"
             "   mask: a mask to apply to an image \n "
             "   points: a list of points ([:, 0] contains x, [:, 1] contains y \n"

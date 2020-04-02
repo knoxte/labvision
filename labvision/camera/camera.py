@@ -1,24 +1,20 @@
-from .settings import *
+from .camera_config import *
 from ..images import Displayer, display, save
 import datetime
-import time
 import cv2
 import sys
 import os
-import signal
-import subprocess
-from sh import gphoto2
-
 
 
 class CameraBase:
     """
     Camera is a simple base class that handles some of the operations common
-    to different types of cameras. The things it does are relatively minimal.
+    to different types of cameras. Its child classes are Camera which handles webcams.
+    and DigitalCamera in digital_camera.py which handles digital cameras.
 
     """
     def __init__(self, cam_type):
-        self.cam_type= cam_type
+        self.cam_type=cam_type
 
 
     def set_property(self, property=None, value=None):
@@ -68,45 +64,28 @@ class CameraBase:
             raise StopIteration
 
 
-class DigitalCamera(CameraBase):
-    def __init__(self, cam_type='NIKON_DSCOOLPIX_9600'):
-        super(DigitalCamera, self).__init__(cam_type=cam_type)
 
-    def kill_process(self):
-        #kill the gphoto2 process at power on
-        p = subprocess.Popen(['ps','-A'],stdout=subprocess.PIPE)
-        out, err = p.communicate()
+class WebCamera(CameraBase):
+    '''
+    This class is called WebCamera but can also be called
+    as Camera for historical reasons.
+    This class handles webcameras. The supported webcams
+    are described in camera_config.py. Each camera has a
+    dictionary of basic settings. If you use a new camera add
+    it to that file and give it a name in capitals.
 
-        for line in out.splitlines():
-            if b'gvfsd-gphoto2' in line:
-                pid = int(line.split(None, 1)[0])
-                os.kill(pid, signal.SIGKILL)
+    Example usage:
+    #Initialise webcam
+    webcam = Camera(cam_type=EXAMPLE_CAMERA)
 
-    def get_frame(self):
-        filename = self.save_frame()
-        return cv2.imread(filename)
+    #returns img but doesn't save
+    img = webcam.get_frame()
 
-    def save_frame(self, filename=None, time_stamp=True):
-        if filename is None:
-            time_stamp = True
-            filename = '.jpg'
-
-        if time_stamp:
-            filename, ext = filename.split('.')
-            filename + self._timestamp() + '.' + ext
-
-        gphoto2('--capture-image-and-download --filename ' + filename)
-
-        return filename
-
-    def camera_settings(self, settings_script='nikon_config.sh'):
-        time.sleep(1)
-        p = subprocess.Popen([settings_script], stdout=subprocess.PIPE)
-        time.sleep(2)
+    # Will take and save an image to file, by default adds a timestamp to img.
+    webcam.save_frame(filename, time_stamp=True)
 
 
-
-class Camera(CameraBase):
+    '''
     def __init__(self, cam_num=None, cam_type=LOGITECH_HD_1080P, frame_size=None, fps=None, ):
 
         if cam_num is None:
@@ -115,7 +94,7 @@ class Camera(CameraBase):
         self.cam = cv2.VideoCapture(cam_num)
         self.set = self.cam.set
         self.get = self.cam.get
-        super(WebCamera, self).__init__(cam_type)
+        super(Camera, self).__init__(cam_type)
 
         frame_sizes = cam_type['res']
         frame_rates = cam_type['fps']
@@ -217,6 +196,7 @@ class Camera(CameraBase):
         self.set_property('hue', self.hue)
         self.set_property('exposure', self.exposure)
 
+Camera = WebCamera
 
 def guess_camera_number():
     try:
