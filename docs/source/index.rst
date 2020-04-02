@@ -14,6 +14,12 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   install
+   camera
+   images
+   video
+
+
 
 Indices and tables
 ==================
