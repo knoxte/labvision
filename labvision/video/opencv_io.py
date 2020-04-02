@@ -4,10 +4,9 @@ import numpy as np
 from slicerator import Slicerator
 from .. import images
 
-__all__ = [
-    'ReadVideo',
-    'WriteVideo'
-]
+
+__all__ = ['ReadVideo','WriteVideo']
+
 
 class WriteVideo:
     """WriteVideo writes images to file with OpenCv

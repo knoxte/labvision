@@ -1,3 +1,4 @@
+'''
 import numpy as np
 import ffmpeg
 from slicerator import Slicerator
@@ -121,3 +122,4 @@ class WriteVideoFFMPEG:
     def close(self):
         self.process.stdin.close()
         self.process.wait()
+'''
