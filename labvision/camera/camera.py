@@ -74,14 +74,22 @@ class WebCamera(CameraBase):
     dictionary of basic settings. If you use a new camera add
     it to that file and give it a name in capitals.
 
-    Example usage:
-    #Initialise webcam
+    Parameters
+    ----------
+    cam_num : int or None   Defines the camera to which the instance points
+    cam_type : Dict   Dictionaries for each camera are defined in camera_config.py
+    frame_size : tuple   Only needs to be defined if you want a non-default value. Default
+    Values are in position Zero in the Dict['frame_size']
+    fps : int    Only needs to be defined if you want a non-default value. Default
+    Values are in position Zero in the Dict['fps']
+
+
+    Examples
+    --------
     webcam = Camera(cam_type=EXAMPLE_CAMERA)
 
-    #returns img but doesn't save
     img = webcam.get_frame()
 
-    # Will take and save an image to file, by default adds a timestamp to img.
     webcam.save_frame(filename, time_stamp=True)
 
 
@@ -121,10 +129,17 @@ class WebCamera(CameraBase):
         assert ret, 'Frame Reading Error'
 
     def get_frame(self):
+        """Get a frame from the camera and return"""
+
         ret, frame = self.cam.read()
         return frame
 
     def save_frame(self, filename, time_stamp=True):
+        """
+        Get a frame from camera and save with filename. By
+        default a timestamp is added to the end of the filename.
+        Set time_stamp=False to prevent this behaviour."""
+
         frame = self.get_frame()
         fname, ext = filename.split('.')
         if time_stamp:
@@ -134,9 +149,14 @@ class WebCamera(CameraBase):
         return filename
 
     def close(self):
+        """Release the OpenCV camera instance"""
+
         self.cam.release()
 
     def get_props(self, show=False):
+        """Retrieve a complete list of camera property values.
+        Set show=True to print to the terminal"""
+
         self.width = self.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.height = self.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.fps = self.get(cv2.CAP_PROP_FPS)
@@ -171,7 +191,8 @@ class WebCamera(CameraBase):
             print('-----------------------------')
 
     def save_settings(self, filename):
-        # Base refactor settings to dict
+        """Save current settings to a file"""
+
         self.get_props()
         settings = (
             self.brightness,
@@ -186,6 +207,8 @@ class WebCamera(CameraBase):
                 f.write("%s\n" % item)
 
     def load_settings(self, filename):
+        """Load current settings from file"""
+
         with open(filename, 'r') as f:
             settings = f.read().splitlines()
         self.brightness, self.contrast, self.gain, \
@@ -199,6 +222,8 @@ class WebCamera(CameraBase):
 Camera = WebCamera
 
 def guess_camera_number():
+    """Function to find camera number assigned to webcam by computer"""
+
     try:
         assert ('linux' in sys.platform), "guess_camera_number only implemented for linux"
         items = os.listdir('/dev/')
