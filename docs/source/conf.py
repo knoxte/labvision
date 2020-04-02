@@ -33,8 +33,9 @@ master_doc = 'index'
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon'
 ]
 
-
-autodoc_mock_imports = ['cv2', 'matplotlib','numpy']
+#Although the docs built the automodule didn't import the code
+#It built locally with 'make html' but not when pushed and built on ReadTheDocs
+autodoc_mock_imports = ['cv2', 'matplotlib','numpy','scipy','slicerator',]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
