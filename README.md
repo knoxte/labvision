@@ -1,5 +1,8 @@
 # labvision
-Repository for managing images, videos and cameras
+Repository for managing images, videos and cameras. 
+
+## Documentation 
+    https://lab-vision.readthedocs.io/en/latest/
 
 ## Installation from github
     pip install git+https://github.com/MikeSmithLabTeam/labvision
