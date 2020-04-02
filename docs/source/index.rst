@@ -13,9 +13,7 @@ Contents
 --------
 .. toctree::
    :maxdepth: 2
-   :ref:`camera'
-   :ref:`images'
-   :ref:`video'
+
 
 Indices and tables
 ==================
