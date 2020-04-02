@@ -17,12 +17,37 @@ __all__ = [
 
 
 def draw_circle(im, cx, cy, rad, color=YELLOW, thickness=2):
+    """Draw Circle NEEDS DOCSTRING
+
+    :param im:
+    :param cx:
+    :param cy:
+    :param rad:
+    :param color:
+    :param thickness:
+
+    :return:
+
+    """
+
     assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
     cv2.circle(im, (int(cx), int(cy)), int(rad), color, thickness)
     return im
 
 
 def draw_circles(im, circles, color=YELLOW, thickness=2):
+    """
+    NEEDS DOCSTRING
+
+    :param im:
+    :param circles:
+    :param color:
+    :param thickness:
+
+    :return:
+
+    """
+
     assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
     assert len(circles) > 0, "Circles must not be empty"
     assert np.shape(circles)[1] == 3, "Circles must contain x, y, and r"
@@ -32,6 +57,19 @@ def draw_circles(im, circles, color=YELLOW, thickness=2):
 
 
 def draw_circles_with_scale(im, circles, values, cmap=cm.viridis, thickness=2):
+    """
+    NEEDS DOCSTRING
+
+    :param im:
+    :param circles:
+    :param values:
+    :param cmap:
+    :param thickness:
+
+    :return:
+
+    """
+
     assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
     for (x, y, r), v in zip(circles, values):
         col = np.multiply(cmap(v), 255)
@@ -40,6 +78,18 @@ def draw_circles_with_scale(im, circles, values, cmap=cm.viridis, thickness=2):
 
 
 def draw_contours(im, contours, col=RED, thickness=1):
+    """
+    NEEDS DOCSTRING
+
+    :param im:
+    :param contours:
+    :param col:
+    :param thickness:
+
+    :return:
+
+    """
+
     assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
     if (np.size(np.shape(col)) == 0) | (np.size(np.shape(col)) == 1):
         im = cv2.drawContours(im, contours, -1, col, thickness)
@@ -95,6 +145,7 @@ def draw_voronoi_cells(im, points):
     im: annotated image
         Same shape and type as input image
     """
+
     assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
     voro = spatial.Voronoi(points)
     ridge_vertices = voro.ridge_vertices

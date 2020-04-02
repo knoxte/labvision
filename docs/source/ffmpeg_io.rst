@@ -1,5 +1,8 @@
 FFMPEG Video
 ============
 
-.. automodule:: labvision.images.ffmpeg_io
+.. automodule:: labvision.video.ffmpeg_io
     :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:

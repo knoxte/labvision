@@ -1,7 +1,7 @@
-Draw
-====
+Camera
+=============
 
-.. automodule:: labvision.images.draw
+.. automodule:: labvision.camera.camera
     :members:
     :undoc-members:
     :inherited-members:

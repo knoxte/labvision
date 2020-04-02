@@ -8,111 +8,62 @@ from .. import images
 __all__ = ['ReadVideo','WriteVideo']
 
 
-class WriteVideo:
-    """WriteVideo writes images to file with OpenCv
-
-    inputs:
-    filename : full path to file, accepts .mp4,.MP4','.m4v','.avi'
-    frame_size : tuple (height, width) - Same order as np.shape
-    frame : example image to be saved
-    fps : frames per second playback of video
-    codec : to encode file
-
-    methods:
-    .add_frame(img) : adds image to object
-    .close() : releases resources
-
-    WriteVideo can be used with "with"
-
-    Example:
-    with WriteVideo as writevid:
-        do stuff
-
-
-    """
-
-    def __init__(
-            self, 
-            filename,
-            frame_size=None, 
-            frame=None,
-            fps=50.0, 
-            codec='XVID'):
-
-        fourcc = cv2.VideoWriter_fourcc(*list(codec))
-
-        assert (frame_size is None or frame is None) and not (frame_size is None and frame is None), "One of frame or frame_size must be supplied"
-
-        if frame_size is None:
-            self.frame_size = np.shape(frame)
-
-        if frame is None:
-            self.frame_size = frame_size
-
-        self.vid = cv2.VideoWriter(
-            filename,
-            fourcc,
-            fps,
-            (self.frame_size[1], self.frame_size[0]))
-
-        assert self.vid.isOpened(), 'Video failed to open'
-
-    def add_frame(self, im):
-        assert np.shape(im) == self.frame_size, "Added frame is wrong shape"
-        self.vid.write(im)
-
-    def close(self):
-        self.vid.release()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
 
 
 @Slicerator.from_class
 class ReadVideo:
-    """Reading Videos class that implements OpenCv.
+    """Reading Videos class is designed to wrap
+    the OpenCV VideoCapture class and make it easier to
+    work with.
 
-    inputs:
-    filename : full path to file, accepts .mp4,.MP4','.m4v','.avi'
-    grayscale : true : loads img in grayscale
-    frame_range : (startframe, stopframe, step)
+    Attributes
+    ----------
+    vid : instance
+        OpenCV VideoCapture instance
+    filename : str
+        Full path and filename to video to read
+    grayscale : bool
+        True to read as grayscale
+    frame_range : tuple
+        (start frame num, end frame num, step)
+    frame_num : int
+        current frame pointed at in video
+    num_frames : int
+        number of frames in the video. If a range is selected this may not be accessible.
+    width : int
+        width of frame in pixels
+    height : int
+        height of frame in pixels
+    colour : int
+        number of colour channels
+    frame_size : tuple
+        gives same format as np.shape
+    fps : int
+        number of frames per second
+    file_extension : str
+        file extension of the video. ReadVideo works with .mp4, .MP4, .m4v and '.avi'
+    properties: dict
+        a dictionary of the parameters
 
-    methods:
-    .read_frame(n=framenumber) : calls frame specified by n. if no argument supplied
-                                calls next available frame. Returns image
-    .set_frame(n)              : moves video to specified frame number but doesn't return
-    .read_next_frame()         : retained as legacy method but treat as hidden
-    .get_vid_props()           : retrieves video properties which are stored as class attributes
-                                [framenum, numframes, current_time, width, height, colour, frame_size,
-                                fps, format, codec, file_extension]
+    Examples
+    --------
+    Use a get method:
 
-    returns:
-    Image - grayscale or colour depending on selection in __init__
-
-    ReadVideo supports usage as a getter:
-
-    Example:
-        read_vid = ReadVideo(filename)
-        img = read[4]   # returns frame at index 4
+        | read_vid = ReadVideo(filename)
+        | img = read[4]
 
     ReadVideo supports usage as a generator:
 
-    Example:
-        for img in ReadVideo(filename, range=(5,20,4)):
-            labvision.images.basics.display(img) # displays images 5,9,13,17
+        | for img in ReadVideo(filename, range=(5,20,4)):
+        |     labvision.images.basics.display(img)
 
     ReadVideo supports "with" usage. This basically means no need to call .close():
 
-    Example:
-        with ReadVideo() as readvid:
-            Do stuff
-
+        | with ReadVideo() as readvid:
+        |     DoStuff
 
     """
+
     def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
         self.filename = filename
         self.grayscale = grayscale
@@ -134,9 +85,15 @@ class ReadVideo:
             raise NotImplementedError('File extension is not implemented')
 
     def init_video(self):
+        """ Initialise video capture object"""
         self.vid = cv2.VideoCapture(self.filename)
 
     def get_vid_props(self):
+        """
+        Get the properties of the video
+
+        :return: dict(properties)
+        """
         self.frame_num = self.vid.get(cv2.CAP_PROP_POS_FRAMES)
         self.num_frames = int(self.vid.get(cv2.CAP_PROP_FRAME_COUNT))
         self.current_time = self.vid.get(cv2.CAP_PROP_POS_MSEC)
@@ -151,10 +108,30 @@ class ReadVideo:
         self.fps = self.vid.get(cv2.CAP_PROP_FPS)
         self.format = self.vid.get(cv2.CAP_PROP_FORMAT)
         self.codec = self.vid.get(cv2.CAP_PROP_FOURCC)
-
         self.file_extension = self.filename.split('.')[1]
 
+        self.properties = { 'frame_num' : self.frame_num,
+            'num_frames' : self.num_frames,
+            'width' : self.width,
+            'height':self.height,
+            'colour' : self.colour,
+            'frame_size' : self.frame_size,
+            'fps':self.fps,
+            'codec':self.codec,
+            'format':self.format,
+            'file_extension':self.file_extension}
+
     def read_frame(self, n=None):
+        """
+        | Read a single frame from the video
+        |
+        | :param n: int
+        |    frame index calls specified frame. If None or not
+        |    specified calls the next available frame.
+        | :return: np.ndarray
+        |    returns specified image
+        """
+
         if n is None:
             return self.read_next_frame()
         else:
@@ -162,11 +139,24 @@ class ReadVideo:
             return self.read_next_frame()
 
     def set_frame(self, n):
+        """
+        Set_frame moves the pointer in the video to the index n
+
+        :param n: int
+            index specifying the frame
+        :return: None
+        """
+
         if n != self.frame_num:
             self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
             self.frame_num = n
 
     def read_next_frame(self):
+        """
+        Reads the next available frame. Note depending on the range specified
+        when instantiating object this may be step frames.
+        :return:
+        """
         assert (self.frame_num >= self.frame_range[0]) & \
                (self.frame_num < self.frame_range[1]) & \
                ((self.frame_num - self.frame_range[0]) % self.frame_range[2] == 0),\
@@ -188,10 +178,12 @@ class ReadVideo:
             raise Exception('Cannot read frame')
 
     def close(self):
+        """Closes video object"""
         if self.filetype == 'video':
             self.vid.release()
 
     def __getitem__(self, frame_num):
+        """Getter reads frame specified by passed index"""
         return self.read_frame(n=frame_num)
 
     def __len__(self):
@@ -201,6 +193,10 @@ class ReadVideo:
         return self
 
     def __next__(self):
+        """
+        Generator returns next available frame specified by step
+        :return:
+        """
         if self.frame_num < self.frame_range[1]:
             return self.read_frame()
         else:
@@ -213,3 +209,74 @@ class ReadVideo:
         self.close()
 
 
+
+class WriteVideo:
+    """WriteVideo writes images to a video file using OpenCV
+
+    Attributes
+    ----------
+    filename : String
+        Full path and filename to output file
+    vid : instance
+        OpenCV VideoWriter instance
+    frame_size : tuple
+        (height, width) - Same order as np.shape
+    frame : np.ndarray
+        example image to be saved
+    fps : int
+        frames per second playback of video
+    codec : string
+        used to encode file
+
+    Examples
+    --------
+    | with WriteVideo(filename) as writevid:
+    |    writevid.add_frame(img)
+    |    writevid.close()
+
+    """
+
+
+    def __init__(self, filename, frame_size=None, frame=None, fps=50.0, codec='XVID'):
+        self.filename=filename
+
+        fourcc = cv2.VideoWriter_fourcc(*list(codec))
+
+        assert (frame_size is None or frame is None) and not (frame_size is None and frame is None), "One of frame or frame_size must be supplied"
+
+        if frame_size is None:
+            self.frame_size = np.shape(frame)
+
+        if frame is None:
+            self.frame_size = frame_size
+
+        self.vid = cv2.VideoWriter(
+            filename,
+            fourcc,
+            fps,
+            (self.frame_size[1], self.frame_size[0]))
+
+        assert self.vid.isOpened(), 'Video failed to open'
+
+    def add_frame(self, im):
+        """
+        Add frame to open video instance
+
+        :param im: Image
+        :return: None
+        """
+        assert np.shape(im) == self.frame_size, "Added frame is wrong shape"
+        self.vid.write(im)
+
+    def close(self):
+        """
+        Release video object
+        """
+        self.vid.release()
+
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
