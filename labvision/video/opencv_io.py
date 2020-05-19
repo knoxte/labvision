@@ -220,7 +220,9 @@ class WriteVideo:
     vid : instance
         OpenCV VideoWriter instance
     frame_size : tuple
-        (height, width) - Same order as np.shape
+        (height, width) - Same order as np.shape. This should be the input frame_size.
+        If the frame is grayscale this will be automatically converted to 3 bit depth
+        to keep opencv happy. A warning is printed to remind you.
     frame : np.ndarray
         example image to be saved
     fps : int
@@ -242,7 +244,14 @@ class WriteVideo:
 
         fourcc = cv2.VideoWriter_fourcc(*list(codec))
 
-        assert (frame_size is None or frame is None) and not (frame_size is None and frame is None), "One of frame or frame_size must be supplied"
+        assert (frame_size is not None or frame is not None), "One of frame or frame_size must be supplied"
+
+        self.grayscale = False
+
+        if np.size(np.shape(frame_size)):
+            print('Warning: grayscale image')
+            print('Images will be converted to bit depth 3 to keep OpenCV happy!')
+            self.grayscale = True
 
         if frame_size is None:
             self.frame_size = np.shape(frame)
@@ -266,6 +275,9 @@ class WriteVideo:
         :return: None
         """
         assert np.shape(im) == self.frame_size, "Added frame is wrong shape"
+
+        if self.grayscale:
+            im=cv2.cvtColor(im.astype(np.uint8), cv2.COLOR_GRAY2BGR)
         self.vid.write(im)
 
     def close(self):
