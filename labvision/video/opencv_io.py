@@ -248,7 +248,7 @@ class WriteVideo:
 
         self.grayscale = False
 
-        if np.size(np.shape(frame_size)):
+        if np.size(np.shape(frame_size)) == 2:
             print('Warning: grayscale image')
             print('Images will be converted to bit depth 3 to keep OpenCV happy!')
             self.grayscale = True
