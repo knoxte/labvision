@@ -5,6 +5,7 @@ from matplotlib import cm
 from scipy import spatial
 
 __all__ = [
+    "draw_filled_polygon",
     "draw_circle",
     "draw_circles",
     "draw_circles_with_scale",
