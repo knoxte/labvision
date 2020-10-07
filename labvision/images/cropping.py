@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import tkinter as tk
 from PIL import Image, ImageTk
+from .draw import draw_filled_polygon
 
 __all__ = [
     'BBox',
@@ -299,3 +300,8 @@ class CropResult:
             "   mask: a mask to apply to an image \n "
             "   points: a list of points ([:, 0] contains x, [:, 1] contains y \n"
             "   circle: a list containing xc, yc, and r for the cropping circle")
+
+def create_mask_from_polygon(im, points):
+    msk = np.zeros_like(im, dtype=np.uint8)
+    msk = draw_filled_polygon(msk, points, (255, 255, 255))
+    return msk[:, :, 0]
