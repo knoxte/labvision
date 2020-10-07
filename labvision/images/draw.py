@@ -15,6 +15,16 @@ __all__ = [
     "draw_contours"
 ]
 
+def draw_filled_polygon(im, points, color=RED):
+    """
+    Adds a filled polygon to an image
+
+    :param im: np.ndarrary of dtype np.uint8
+    :param points: N, 2 ndarray of corner points
+    :param color: BGR color tuple or images library color
+    :return: im: ndarray
+    """
+    return cv2.fillPoly(im, np.array([points], dtype=np.int32), color)
 
 def draw_circle(im, cx, cy, rad, color=YELLOW, thickness=2):
     """Draw Circle NEEDS DOCSTRING
