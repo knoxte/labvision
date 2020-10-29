@@ -8,3 +8,10 @@ class TestCircleGui(TestCase):
         filepath = os.path.join(data_dir, "SampleImage.jpg")
         im = images.read_img(filepath)
         images.CircleGui(im, scale=0.2)
+
+class TestCircleGuiGray(TestCase):
+    def test_crop_grayscale_image(self):
+        print('GRAY')
+        filepath = os.path.join(data_dir, "SampleImage.jpg")
+        im = images.read_img(filepath, True)
+        images.CircleGui(im, scale=0.2)

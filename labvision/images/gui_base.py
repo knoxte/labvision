@@ -32,7 +32,7 @@ class ParamGui:
 
     def _file_setup(self, img_or_vid):
         if isinstance(img_or_vid, np.ndarray):
-            if self.grayscale:
+            if self.grayscale and len(img_or_vid.shape) == 3:
                 self.im = bgr_to_gray(img_or_vid)
             else:
                 self.im = img_or_vid
