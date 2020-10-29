@@ -15,3 +15,10 @@ class TestCircleGuiGray(TestCase):
         filepath = os.path.join(data_dir, "SampleImage.jpg")
         im = images.read_img(filepath, True)
         images.CircleGui(im, scale=0.2)
+
+
+class TestNewGUI(TestCase):
+    def test(self):
+        filepath = os.path.join(data_dir, "SampleImage.jpg")
+        im = images.read_img(filepath, True)
+        images.ParamGui2([im, im])

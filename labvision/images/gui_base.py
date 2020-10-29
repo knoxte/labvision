@@ -3,15 +3,84 @@ import random
 from PIL import Image, ImageTk
 import numpy as np
 
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider
+from PyQt5.QtCore import Qt
+
+from .QtImageViewer import QtImageViewer
+
+
+from ..video import ReadVideo
+
+import qimage2ndarray
+
 from .basics import *
 from .colors import *
 from .geometric import *
 
+import sys
+
 
 __all__ = [
-    "ParamGui"
+    "ParamGui",
+    "ParamGui2"
 ]
 
+
+class ParamGui2:
+
+    def __init__(self, source):
+        self.parse_source(source)
+        self.init_ui()
+
+    def parse_source(self, source):
+        assert isinstance(source, ReadVideo) or isinstance(source, list) or isinstance(source, np.ndarray), \
+            "source must be a ReadVideo, list or numpy array instance"
+        if isinstance(source, np.ndarray):
+            self.im = source
+            self.type = 'im'
+
+        if isinstance(source, ReadVideo):
+            self.vid = source
+            self.frame_no = 0
+            self.num_frames = self.vid.num_frames
+            self.im = self.vid.find_frame(self.frame_no)
+            self.type = 'vid'
+
+        if isinstance(source, list):
+            self.ims = source
+            self.im = self.ims[0]
+            self.frame_no = 0
+            self.num_frames = len(self.ims)
+            self.type = 'list'
+
+    def init_ui(self):
+        self.app = QApplication(sys.argv)
+        self.window = QWidget()
+        self.image_viewer = QtImageViewer()
+        im = qimage2ndarray.array2qimage(self.im)
+        self.image_viewer.setImage(im)
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.image_viewer)
+        self.add_sliders()
+        self.window.setLayout(self.vbox)
+        self.window.show()
+        self.app.exec_()
+
+
+    def add_sliders(self):
+        if self.type in ['list', 'vid']:
+            frame_slider = QSlider(Qt.Horizontal, self.window)
+            frame_slider.setRange(0, self.num_frames-1)
+            frame_slider.valueChanged.connect(self.frame_slider_update)
+            self.vbox.addWidget(frame_slider)
+
+    def frame_slider_update(self, value):
+        if self.type == 'list':
+            print('get')
+            self.im = self.ims[value]
+        else:
+            self.im = self.vid.find_frame(value)
+        # self.image_viewer.setImage(self.im)
 
 class ParamGui:
 
