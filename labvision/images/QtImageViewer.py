@@ -5,7 +5,7 @@
 import os.path
 try:
     from PyQt5.QtCore import Qt, QRectF, pyqtSignal, QT_VERSION_STR
-    from PyQt5.QtGui import QImage, QPixmap, QPainterPath
+    from PyQt5.QtGui import QImage, QPixmap, QPainterPath, QPainter
     from PyQt5.QtWidgets import QGraphicsView, QGraphicsScene, QFileDialog
 except ImportError:
     try:
@@ -65,8 +65,8 @@ class QtImageViewer(QGraphicsView):
         #   Qt.ScrollBarAlwaysOff: Never shows a scroll bar.
         #   Qt.ScrollBarAlwaysOn: Always shows a scroll bar.
         #   Qt.ScrollBarAsNeeded: Shows a scroll bar only when zoomed.
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # Stack of QRectF zoom boxes in scene coordinates.
         self.zoomStack = []
@@ -74,6 +74,10 @@ class QtImageViewer(QGraphicsView):
         # Flags for enabling/disabling mouse interaction.
         self.canZoom = True
         self.canPan = True
+
+        self.setRenderHints(QPainter.Antialiasing|QPainter.SmoothPixmapTransform)
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
+        self.setDragMode(QGraphicsView.ScrollHandDrag)
 
     def hasImage(self):
         """ Returns whether or not the scene contains an image pixmap.
@@ -196,6 +200,10 @@ class QtImageViewer(QGraphicsView):
                 self.updateViewer()
             self.rightMouseButtonDoubleClicked.emit(scenePos.x(), scenePos.y())
         QGraphicsView.mouseDoubleClickEvent(self, event)
+
+    def wheelEvent(self, event):
+        adj = (event.angleDelta().y()/120) * 0.1
+        self.scale(1+adj, 1+adj)
 
 
 if __name__ == '__main__':
