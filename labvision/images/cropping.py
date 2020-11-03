@@ -198,10 +198,11 @@ class CropRect(CropBase):
         points[:, 1] = points[:, 1] * self.h_ratio
         bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
-        points[:, 0] -= bbox.xmin
-        points[:, 1] -= bbox.ymin
+
         cv2.rectangle(mask, (points[0,0], points[0,1]),(points[1,0], points[1,1]),
                      color=(255, 255, 255), thickness=-1)
+        points[:, 0] -= bbox.xmin
+        points[:, 1] -= bbox.ymin
         self.result = CropResult(bbox, mask, points=points)
 
 
@@ -209,7 +210,7 @@ class CropPolygon(CropBase):
     def __init__(self,im):
         super(CropPolygon, self).__init__(im)
 
-    def create_shape(self, points=[0,0]):
+    def create_shape(self, points=[0, 0]):
         return self.canvas.create_polygon(points, outline='black',
                                                   width=2)
 
@@ -227,10 +228,10 @@ class CropPolygon(CropBase):
         points[:, 1] = points[:, 1] * self.h_ratio
         bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
-        points[:, 0] -= bbox.xmin
-        points[:, 1] -= bbox.ymin
         cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
                      color=(255, 255, 255))
+        points[:, 0] -= bbox.xmin
+        points[:, 1] -= bbox.ymin
         self.result = CropResult(bbox, mask, points=points)
 
 
