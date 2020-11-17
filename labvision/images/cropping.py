@@ -172,7 +172,7 @@ class CropBase:
         This function should set the crop result attribute and
         be implemented in the child classes
         """
-
+        pass
 
     def update(self,x,y):
         #stub to be implemented in child
