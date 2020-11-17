@@ -119,7 +119,7 @@ class CropBase:
         self.shape = self.create_shape()
         self.canvas.pack()
 
-        image = Image.fromarray(im)
+        image = Image.fromarray(im[:, :, ::-1])
         self.h_ratio = image.height / height
         self.w_ratio = image.width / width
         image = image.resize((width, height))
