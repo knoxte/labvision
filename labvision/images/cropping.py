@@ -227,10 +227,10 @@ class CropPolygon(CropBase):
         points[:, 1] = points[:, 1] * self.h_ratio
         bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
-        points[:, 0] -= bbox.xmin
-        points[:, 1] -= bbox.ymin
         cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
                      color=(255, 255, 255))
+        points[:, 0] -= bbox.xmin
+        points[:, 1] -= bbox.ymin
         self.result = CropResult(bbox, mask, points=points)
 
 
