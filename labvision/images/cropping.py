@@ -10,7 +10,8 @@ __all__ = [
     'mask',
     'crop_and_mask',
     'crop_circle',
-    'crop_polygon'
+    'crop_polygon',
+    'crop_rectangle'
 ]
 
 
@@ -94,6 +95,9 @@ def crop_circle(im):
     crop_object = CropCircle(im)
     return crop_object.result
 
+def crop_rectangle(im):
+    crop_object = CropRect(im)
+    return crop_object.result
 
 class CropBase:
 
