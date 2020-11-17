@@ -282,8 +282,15 @@ class CropCircle(CropBase):
         mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
         cv2.circle(mask, (int(self.xc), int(self.yc)), int(self.r),
                    [255, 255, 255], thickness=-1)
-        bbox = BBox(int(self.xc - self.r), int(self.xc + self.r),
-                    int(self.yc - self.r), int(self.yc + self.r))
+        xmin = int(self.xc - self.r)
+        xmax = int(self.xc + self.r)
+        ymin = int(self.yc - self.r)
+        ymax = int(self.yc + self.r)
+        if xmin < 0:
+            xmin = 0
+        if ymin < 0:
+            ymin = 0
+        bbox = BBox(xmin, xmax, ymin, ymax)
         points = [self.xc, self.yc, self.r]
         self.result = CropResult(bbox, mask, circle=points)
         self.master.quit()
