@@ -161,6 +161,19 @@ class CropBase:
         self.master.quit()
         self.master.destroy()
 
+    def create_shape(self, points=()):
+        """
+        This function should add the shape to the canvas and
+        be implemented in the child classes"""
+        pass
+
+    def finish_crop(self):
+        """
+        This function should set the crop result attribute and
+        be implemented in the child classes
+        """
+
+
     def update(self,x,y):
         #stub to be implemented in child
         pass
