@@ -27,6 +27,10 @@ class BBox:
     def to_list(self):
         return [[self.xmin, self.ymin], [self.xmax, self.ymax]]
 
+    def __str__(self):
+        s = "BBOX: xmin = {}, xmax = {}, ymin = {}, ymax = {}".format(self.xmin, self.xmax, self.ymin, self.ymax)
+        return s
+
 
 def crop(im, bbox):
     """
