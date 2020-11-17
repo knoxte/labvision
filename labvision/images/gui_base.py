@@ -3,16 +3,13 @@ import random
 from PIL import Image, ImageTk
 import numpy as np
 
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider
-from PyQt5.QtCore import Qt
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider, QCheckBox
+from PySide2.QtCore import Qt
 
-from .QtImageViewer import QtImageViewer
+from qtwidgets import QImageViewer, QCustomSlider
 
 
 from ..video import ReadVideo
-
-import qimage2ndarray
-
 from .basics import *
 from .colors import *
 from .geometric import *
@@ -53,26 +50,63 @@ class ParamGui2:
             self.num_frames = len(self.ims)
             self.type = 'list'
 
+        self.im0 = self.im.copy()
+
     def init_ui(self):
         self.app = QApplication(sys.argv)
         self.window = QWidget()
-        self.image_viewer = QtImageViewer()
-        im = qimage2ndarray.array2qimage(self.im)
-        self.image_viewer.setImage(im)
+        self.image_viewer = QImageViewer()
+        self.image_viewer.setImage(self.im)
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(self.image_viewer)
+
+        self.live_update_checkbox = QCheckBox('Live Update', parent=self.window)
+        self.vbox.addWidget(self.live_update_checkbox)
+
         self.add_sliders()
+        self.live_update_checkbox.stateChanged.connect(self._update_sliders)
         self.window.setLayout(self.vbox)
         self.window.show()
         self.app.exec_()
 
-
     def add_sliders(self):
+
+        self.sliders = {}
+
         if self.type in ['list', 'vid']:
-            frame_slider = QSlider(Qt.Horizontal, self.window)
-            frame_slider.setRange(0, self.num_frames-1)
-            frame_slider.valueChanged.connect(self.frame_slider_update)
-            self.vbox.addWidget(frame_slider)
+            self.frame_slider = QCustomSlider(
+                self.window, title='frame', min_=0, max_=self.num_frames-1, spinbox=True,
+                return_func=self.frame_slider_update)
+            self.vbox.addWidget(self.frame_slider)
+
+        for key in sorted(self.param_dict.keys()):
+            params = self.param_dict[key]
+            val, bottom, top, step = params
+            slider = QCustomSlider(
+                parent=self.window, title=key, min_=bottom, max_=top, value_=val,
+                return_func=self.slider_callback, odd=True, spinbox=True)
+            self.vbox.addWidget(slider)
+            self.sliders[key] = slider
+
+    def slider_callback(self, val):
+        for key in self.param_dict:
+            val = self.sliders[key].value()
+        if self.live_update_checkbox.isChecked():
+            self._update_sliders()
+
+    def _update_sliders(self):
+        if self.type in ['list', 'vid']:
+            self.frame_no = self.frame_slider.value()
+            if self.type == 'list':
+                self.im0 = self.ims[self.frame_no]
+            else:
+                self.im0 = self.read_vid.find_frame(self.frame_no)
+
+        for key in self.param_dict:
+            val = self.sliders[key].value()
+            self.param_dict[key][0] = val
+        self.update()
+        self.update_im()
 
     def frame_slider_update(self, value):
         if self.type == 'list':
@@ -80,7 +114,15 @@ class ParamGui2:
             self.im = self.ims[value]
         else:
             self.im = self.vid.find_frame(value)
-        # self.image_viewer.setImage(self.im)
+
+    def _display_img(self, *ims):
+        if len(ims) == 1:
+            self.im = ims[0]
+        else:
+            self.im = hstack(*ims)
+
+    def update_im(self):
+        self.image_viewer.setImage(self.im)
 
 class ParamGui:
 
@@ -148,6 +190,17 @@ class ParamGui:
             self.labels[key].config(text=val)
         if self.live_update.get():
             self._update_sliders()
+
+    def _update_sliders(self):
+        if self.type == 'multiframe':
+            self.frame_no = self.frame_slider.get()
+            self.im0 = self.read_vid.find_frame(self.frame_no)
+
+        for key in self.param_dict:
+            val = self.sliders[key].get()
+            self.param_dict[key][0] = val
+        self.update()
+        self.update_im()
 
     def add_sliders(self):
 

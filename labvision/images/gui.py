@@ -16,7 +16,8 @@ __all__ = [
     "Inrange3GUI",
     "InrangeGui",
     "CannyGui",
-    "ContoursGui"
+    "ContoursGui",
+    "CircleGui2"
 ]
 
 
@@ -36,6 +37,26 @@ class ThresholdGui(ParamGui):
             self._display_img(threshold(self.im0,
                                         value=self.param_dict['threshold'][0],
                                         mode=cv2.THRESH_BINARY_INV))
+
+class CircleGui2(ParamGui2):
+    def __init__(self, im):
+        self.grayscale = True
+        self.param_dict = {
+            'distance': [25, 3, 51, 2],
+            'thresh1': [200, 0, 255, 1],
+            'thresh2': [5, 0, 20, 1],
+            'min_rad': [17, 3, 50, 1],
+            'max_rad': [19, 3, 50, 1],
+        }
+        ParamGui2.__init__(self, im)
+
+    def update(self):
+        circles = find_circles(self.im0, self.param_dict['distance'][0],
+                               self.param_dict['thresh1'][0],
+                               self.param_dict['thresh2'][0],
+                               self.param_dict['min_rad'][0],
+                               self.param_dict['max_rad'][0])
+        self._display_img(draw_circles(gray_to_bgr(self.im0), circles))
 
 
 class CircleGui(ParamGui):
