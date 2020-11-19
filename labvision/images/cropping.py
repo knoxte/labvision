@@ -1,8 +1,11 @@
 import cv2
 import numpy as np
-import tkinter as tk
-from PIL import Image, ImageTk
 from .draw import draw_filled_polygon
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PySide2.QtCore import Qt, QPointF, QRectF
+from PySide2.QtGui import QPolygonF, QPen
+from qtwidgets import QImageViewer
+import sys
 
 __all__ = [
     'BBox',
@@ -11,7 +14,7 @@ __all__ = [
     'crop_and_mask',
     'crop_circle',
     'crop_polygon',
-    'crop_rectangle'
+    'crop_rectangle',
 ]
 
 
@@ -99,112 +102,109 @@ def crop_rectangle(im):
     crop_object = CropRect(im)
     return crop_object.result
 
+
 class CropBase:
 
     def __init__(self, im):
         self.im = im
         self.points = []
-        self.setup(im)
+        self.setup()
 
-    def setup(self, im, width=1280, height=720):
-        self.master = tk.Tk()
-        self.master.wm_title("Crop")
-        self.frame = tk.Frame(self.master)
-        self.frame.pack()
-        label = tk.Label(self.frame, text="Click to add points")
-        label.pack()
-
-        self.canvas = tk.Canvas(self.frame, width=width,
-                                height=height)
+    def setup(self):
+        self.app = QApplication(sys.argv)
+        self.window = QWidget()
+        self.image_viewer = QImageViewer()
+        self.image_viewer.setImage(self.im)
+        self.image_viewer.leftMouseButtonReleased.connect(self.mouse1_callback)
+        self.image_viewer.rightMouseButtonReleased.connect(self.mouse3_callback)
+        self.image_viewer.keyPressed.connect(self.keypress_callback)
         self.shape = self.create_shape()
-        self.canvas.pack()
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.image_viewer)
+        self.window.setLayout(self.vbox)
+        self.window.show()
+        self.app.exec_()
 
-        image = Image.fromarray(im[:, :, ::-1])
-        self.h_ratio = image.height / height
-        self.w_ratio = image.width / width
-        image = image.resize((width, height))
-        image = ImageTk.PhotoImage(image)
+    def mouse1_callback(self, x, y):
+        self.update(int(x), int(y))
 
-        self.canvas.create_image(0, 0, anchor=tk.NW, image=image)
-        self.canvas.bind("<Button-1>", self.mouse1_callback)
-        self.canvas.bind("<Button-2>", self.mouse2_callback)
-        self.canvas.bind("<Button-3>", self.mouse3_callback)
-        self.master.bind("<Return>", self.return_callback)
+    def mouse3_callback(self, event):
+        print("undo")
 
-        undo_button = tk.Button(self.frame, text='Undo (Right Click)',
-                                command=self.undo)
-        undo_button.pack(side=tk.LEFT, fill=tk.BOTH)
-        finished_button = tk.Button(self.frame, text='Finished (Return)',
-                                    command=self.finish)
-        finished_button.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
-        reset_button = tk.Button(self.frame, text='Reset (Middle Click)',
-                                 command=self.reset)
-        reset_button.pack(side=tk.LEFT, fill=tk.BOTH)
-        tk.mainloop()
+    def keypress_callback(self, event):
+        if event.key() == Qt.Key_Return:
+            self.finish()
 
     def undo(self):
         if len(self.points) == 2:
             self.reset()
-        elif len(self.points) > 2:
+        else:
             self.points.pop()
             self.points.pop()
-            self.canvas.delete(self.shape)
-            self.shape = self.create_shape(self.points)
 
     def reset(self):
         self.points = []
-        self.canvas.delete(self.shape)
+        # Delete existing shape
         self.shape = self.create_shape()
 
     def finish(self):
         self.finish_crop()
-        self.master.quit()
-        self.master.destroy()
+        self.app.exit()
 
     def create_shape(self, points=()):
-        """
-        This function should add the shape to the canvas and
-        be implemented in the child classes"""
+        """This function should add the shape """
         pass
 
     def finish_crop(self):
-        """
-        This function should set the crop result attribute and
-        be implemented in the child classes
-        """
+        """This function should be overloaded"""
         pass
 
-    def update(self,x,y):
-        #stub to be implemented in child
+    def update(self, x, y):
+        """This function should be overloaded"""
         pass
 
-    def mouse1_callback(self, event):
-        x = event.x
-        y = event.y
-        self.update(x, y)
 
-    def mouse2_callback(self, event):
-        self.reset()
+class CropPolygon(CropBase):
+    def __init__(self, im):
+        CropBase.__init__(self, im)
 
-    def mouse3_callback(self, event):
-        self.undo()
+    def create_shape(self, points=[0, 0]):
+        qpoints = [QPointF(int(p), int(q)) for p, q in zip(points[::2], points[1::2])]
+        polygon = QPolygonF(qpoints)
+        return self.image_viewer.scene.addPolygon(polygon, QPen(Qt.red, 3))
 
-    def return_callback(self, event):
-        self.finish()
+    def update(self, x, y):
+        self.points.append(x)
+        self.points.append(y)
+        self.image_viewer.scene.removeItem(self.shape)
+        self.shape = self.create_shape(self.points)
+
+    def finish_crop(self):
+        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
+        points = np.array(self.points)
+        points = points.reshape(len(points) // 2, 2)
+        points[:, 0] = points[:, 0]
+        points[:, 1] = points[:, 1]
+        bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
+                    max(points[:, 1]))
+        cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
+                     color=(255, 255, 255))
+        points[:, 0] -= bbox.xmin
+        points[:, 1] -= bbox.ymin
+        self.result = CropResult(bbox, mask, points=points)
 
 
 class CropRect(CropBase):
-    def __init__(self,im):
-        super(CropRect, self).__init__(im)
+    def __init__(self, im):
+        CropBase.__init__(self, im)
 
     def create_shape(self, points=[0, 0, 0, 0]):
-        return self.canvas.create_rectangle(points, outline='black',
-                                          width=2)
+        poly = QRectF(QPointF(points[0], points[1]),
+                      QPointF(points[2], points[3]))
+        return self.image_viewer.scene.addRect(poly, QPen(Qt.red, 4))
 
     def update(self, x, y):
-        self.canvas.delete(self.shape)
-        #self.shape = self.create_shape(self.points)
-        #if len(self.points) < 4:
+        self.image_viewer.scene.removeItem(self.shape)
         self.points.append(x)
         self.points.append(y)
 
@@ -215,8 +215,8 @@ class CropRect(CropBase):
         mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
         points = np.array(self.points)
         points = points.reshape(len(points) // 2, 2)
-        points[:, 0] = points[:, 0] * self.w_ratio
-        points[:, 1] = points[:, 1] * self.h_ratio
+        points[:, 0] = points[:, 0]
+        points[:, 1] = points[:, 1]
         bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
                     max(points[:, 1]))
         cv2.rectangle(mask, (points[0,0], points[0,1]),(points[1,0], points[1,1]),
@@ -226,50 +226,23 @@ class CropRect(CropBase):
         self.result = CropResult(bbox, mask, points=points)
 
 
-class CropPolygon(CropBase):
-    def __init__(self,im):
-        super(CropPolygon, self).__init__(im)
-
-    def create_shape(self, points=[0,0]):
-        return self.canvas.create_polygon(points, outline='black',
-                                                  width=2)
-
-    def update(self, x, y):
-        self.points.append(x)
-        self.points.append(y)
-        self.canvas.delete(self.shape)
-        self.shape = self.create_shape(self.points)
-
-    def finish_crop(self):
-        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
-        points = np.array(self.points)
-        points = points.reshape(len(points) // 2, 2)
-        points[:, 0] = points[:, 0] * self.w_ratio
-        points[:, 1] = points[:, 1] * self.h_ratio
-        bbox = BBox(min(points[:, 0]), max(points[:, 0]), min(points[:, 1]),
-                    max(points[:, 1]))
-        cv2.fillPoly(mask, pts=np.array([points], dtype=np.int32),
-                     color=(255, 255, 255))
-        points[:, 0] -= bbox.xmin
-        points[:, 1] -= bbox.ymin
-        self.result = CropResult(bbox, mask, points=points)
-
-
 class CropCircle(CropBase):
     def __init__(self, im):
         self.selections = []
-        super(CropCircle, self).__init__(im)
+        CropBase.__init__(self, im)
 
     def create_shape(self, points=[0,0,0,0]):
-        return self.canvas.create_oval(points, outline='black',
-                                              width=2)
+        rect = QRectF(QPointF(points[0], points[1]),
+                      QPointF(points[2], points[3]))
+        return self.image_viewer.scene.addEllipse(rect, QPen(Qt.red, 3))
+
     def update(self, x, y):
         if len(self.points) < 6:
             self.points.append(x)
             self.points.append(y)
+            rect = QRectF(QPointF(x - 2, y - 2), QPointF(x + 2, y + 2))
             self.selections.append(
-                self.canvas.create_oval([x - 2, y - 2, x + 2, y + 2],
-                                        outline='red', width=2))
+                self.image_viewer.scene.addEllipse(rect, QPen(Qt.green, 2)))
         if len(self.points) == 6:
             xc, yc, r = self.find_circle()
             self.shape = self.create_shape([xc - r, yc - r, xc + r, yc + r])
@@ -310,7 +283,6 @@ class CropCircle(CropBase):
         bbox = BBox(xmin, xmax, ymin, ymax)
         points = [self.xc, self.yc, self.r]
         self.result = CropResult(bbox, mask, circle=points)
-        self.master.quit()
 
 class CropResult:
 
