@@ -7,6 +7,11 @@ Repository for managing images, videos and cameras.
 ## Installation from github
     pip install git+https://github.com/MikeSmithLabTeam/labvision
     
+## Manually add pyside dependency from conda
+
+    conda install -c conda-forge pyside2
+    
+    
 ## Updating if already installed
     pip install --upgrade git+https://github.com/MikeSmithLabTeam/labvision
     
