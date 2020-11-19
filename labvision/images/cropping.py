@@ -108,6 +108,7 @@ class CropBase:
     def __init__(self, im):
         self.im = im
         self.points = []
+        self.selections = []
         self.setup()
 
     def setup(self):
@@ -126,25 +127,33 @@ class CropBase:
         self.app.exec_()
 
     def mouse1_callback(self, x, y):
+        self.add_selection(x, y)
         self.update(int(x), int(y))
 
     def mouse3_callback(self, event):
-        print("undo")
+        self.undo()
 
     def keypress_callback(self, event):
         if event.key() == Qt.Key_Return:
             self.finish()
 
     def undo(self):
+        if len(self.selections) > 0:
+            self.remove_selection(-1)
         if len(self.points) == 2:
             self.reset()
+        elif len(self.points) == 0:
+            pass
         else:
             self.points.pop()
             self.points.pop()
+        if self.shape is not None:
+            self.image_viewer.scene.removeItem(self.shape)
 
     def reset(self):
         self.points = []
-        # Delete existing shape
+        if self.shape is not None:
+            self.image_viewer.scene.removeItem(self.shape)
         self.shape = self.create_shape()
 
     def finish(self):
@@ -162,6 +171,17 @@ class CropBase:
     def update(self, x, y):
         """This function should be overloaded"""
         pass
+
+    def remove_selection(self, index):
+        selection = self.selections[index]
+        if selection is not None:
+            self.image_viewer.scene.removeItem(selection)
+            self.selections.pop(-1)
+
+    def add_selection(self, x, y):
+        rect = QRectF(QPointF(x - 2, y - 2), QPointF(x + 2, y + 2))
+        self.selections.append(
+            self.image_viewer.scene.addEllipse(rect, QPen(Qt.green, 2)))
 
 
 class CropPolygon(CropBase):
@@ -192,6 +212,19 @@ class CropPolygon(CropBase):
         points[:, 0] -= bbox.xmin
         points[:, 1] -= bbox.ymin
         self.result = CropResult(bbox, mask, points=points)
+
+    def undo(self):
+        if len(self.selections) > 0:
+            self.remove_selection(-1)
+        if len(self.points) == 2:
+            self.reset()
+        elif len(self.points) == 0:
+            pass
+        else:
+            self.points.pop()
+            self.points.pop()
+            self.image_viewer.scene.removeItem(self.shape)
+            self.shape = self.create_shape(self.points)
 
 
 class CropRect(CropBase):
@@ -240,9 +273,6 @@ class CropCircle(CropBase):
         if len(self.points) < 6:
             self.points.append(x)
             self.points.append(y)
-            rect = QRectF(QPointF(x - 2, y - 2), QPointF(x + 2, y + 2))
-            self.selections.append(
-                self.image_viewer.scene.addEllipse(rect, QPen(Qt.green, 2)))
         if len(self.points) == 6:
             xc, yc, r = self.find_circle()
             self.shape = self.create_shape([xc - r, yc - r, xc + r, yc + r])
@@ -283,6 +313,7 @@ class CropCircle(CropBase):
         bbox = BBox(xmin, xmax, ymin, ymax)
         points = [self.xc, self.yc, self.r]
         self.result = CropResult(bbox, mask, circle=points)
+
 
 class CropResult:
 
