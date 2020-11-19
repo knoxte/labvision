@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from .draw import draw_filled_polygon
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QErrorMessage
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QErrorMessage, QLabel
 from PySide2.QtCore import Qt, QPointF, QRectF
 from PySide2.QtGui import QPolygonF, QPen
 from qtwidgets import QImageViewer
@@ -121,6 +121,9 @@ class CropBase:
         self.image_viewer.keyPressed.connect(self.keypress_callback)
         self.shape = self.create_shape()
         self.vbox = QVBoxLayout()
+        self.label = QLabel(self.message)
+        self.vbox.addWidget(self.label)
+
         self.vbox.addWidget(self.image_viewer)
 
         self.hbox = QHBoxLayout()
@@ -209,7 +212,9 @@ class CropBase:
 
 class CropPolygon(CropBase):
     def __init__(self, im):
+        self.message = 'Select polygon vertices with left mouse'
         CropBase.__init__(self, im)
+
 
     def create_shape(self, points=[0, 0]):
         qpoints = [QPointF(int(p), int(q)) for p, q in zip(points[::2], points[1::2])]
@@ -252,6 +257,7 @@ class CropPolygon(CropBase):
 
 class CropRect(CropBase):
     def __init__(self, im):
+        self.message = "Select top-left and bottom-right vertices with left mouse"
         CropBase.__init__(self, im)
 
     def create_shape(self, points=[0, 0, 0, 0]):
@@ -284,7 +290,7 @@ class CropRect(CropBase):
 
 class CropCircle(CropBase):
     def __init__(self, im):
-        self.selections = []
+        self.message = 'Select three distant points on the edge of the circle using the left mouse'
         CropBase.__init__(self, im)
 
     def create_shape(self, points=[0,0,0,0]):
