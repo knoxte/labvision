@@ -7,7 +7,7 @@ class TestCircleGui(TestCase):
     def test_circle_image(self):
         filepath = os.path.join(data_dir, "maxresdefault.jpg")
         im = images.read_img(filepath)
-        images.CircleGui(im, scale=0.2)
+        images.CircleGui(im)
 
 class TestCircleGuiGray(TestCase):
     def test_circle_grayscale_image(self):

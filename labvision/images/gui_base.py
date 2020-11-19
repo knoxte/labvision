@@ -10,8 +10,7 @@ from qtwidgets import QImageViewer, QCustomSlider
 
 
 from ..video import ReadVideo
-from .basics import *
-from .colors import *
+from ..images import gray_to_bgr
 from .geometric import *
 
 import sys
@@ -24,7 +23,8 @@ __all__ = [
 
 class ParamGui:
 
-    def __init__(self, source, num_imgs=1):
+    def __init__(self, source):
+        # self.show_original = show_original
         self.parse_source(source)
         self.init_ui()
 
@@ -118,6 +118,10 @@ class ParamGui:
         if len(ims) == 1:
             self.im = ims[0]
         else:
+            ims = list(ims)
+            for i in range(len(ims)):
+                if len(ims[i].shape) == 2:
+                    ims[i] = gray_to_bgr(ims[i])
             self.im = hstack(*ims)
 
     def update_im(self):

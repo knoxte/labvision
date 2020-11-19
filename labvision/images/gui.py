@@ -146,7 +146,7 @@ class ContoursGui(ParamGui):
                            'invert': [0, 0, 1, 1]}
         self.thickness = thickness
         self.grayscale = True
-        ParamGui.__init__(self, img, num_imgs=2)
+        ParamGui.__init__(self, img)
         self.blurred_img = self.im.copy()
         self.update()
 
@@ -241,7 +241,7 @@ class WatershedGui(ParamGui):
                            'invert': [0, 0, 1, 1],
                            'watershed_thresh': [1, 0, 255, 1]}
         self.grayscale = True
-        ParamGui.__init__(self, img, num_imgs=2)
+        ParamGui.__init__(self, img)
         self.blurred_img = self.im.copy()
         self.update()
 
