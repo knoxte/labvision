@@ -22,7 +22,6 @@ setuptools.setup(
         'scipy',
         'slicerator',
         'ffmpeg-python',
-        'PySide2',
         'qtwidgets @ git+https://github.com/MikeSmithLabTeam/qtwidgets'
 
     ],
