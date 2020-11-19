@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from .draw import draw_filled_polygon
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QErrorMessage
 from PySide2.QtCore import Qt, QPointF, QRectF
 from PySide2.QtGui import QPolygonF, QPen
 from qtwidgets import QImageViewer
@@ -122,6 +122,20 @@ class CropBase:
         self.shape = self.create_shape()
         self.vbox = QVBoxLayout()
         self.vbox.addWidget(self.image_viewer)
+
+        self.hbox = QHBoxLayout()
+        self.undo_button = QPushButton('Undo (Right Mouse)')
+        self.undo_button.clicked.connect(self.undo)
+        self.hbox.addWidget(self.undo_button)
+        self.enter_button = QPushButton('Finish (Return Key)')
+        self.enter_button.clicked.connect(self.finish)
+        self.hbox.addWidget(self.enter_button)
+        self.reset_button = QPushButton('Reset')
+        self.reset_button.clicked.connect(self.reset)
+        self.hbox.addWidget(self.reset_button)
+
+        self.vbox.addLayout(self.hbox)
+
         self.window.setLayout(self.vbox)
         self.window.show()
         self.app.exec_()
@@ -152,13 +166,22 @@ class CropBase:
 
     def reset(self):
         self.points = []
+        for i in range(len(self.selections)):
+            self.remove_selection(-1*(i+1))
         if self.shape is not None:
             self.image_viewer.scene.removeItem(self.shape)
         self.shape = self.create_shape()
 
     def finish(self):
-        self.finish_crop()
-        self.app.exit()
+        try:
+            self.finish_crop()
+            self.app.exit()
+        except Exception as e:
+            error = QErrorMessage(self.window)
+            error.setWindowTitle("Cropping Error")
+            error.showMessage("Select more points")
+
+
 
     def create_shape(self, points=()):
         """This function should add the shape """
