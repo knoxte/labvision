@@ -180,6 +180,7 @@ class CropBase:
             self.finish_crop()
             self.app.exit()
         except Exception as e:
+            raise Exception(e)
             error = QErrorMessage(self.window)
             error.setWindowTitle("Cropping Error")
             error.showMessage("Select more points")
@@ -209,6 +210,13 @@ class CropBase:
         self.selections.append(
             self.image_viewer.scene.addEllipse(rect, QPen(Qt.green, 2)))
 
+    def create_empty_mask(self):
+        if len(self.im.shape) == 2:
+            mask = np.zeros_like(self.im, dtype=np.uint8)
+        else:
+            mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
+        return mask
+
 
 class CropPolygon(CropBase):
     def __init__(self, im):
@@ -228,7 +236,7 @@ class CropPolygon(CropBase):
         self.shape = self.create_shape(self.points)
 
     def finish_crop(self):
-        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
+        mask = self.create_empty_mask()
         points = np.array(self.points)
         points = points.reshape(len(points) // 2, 2)
         points[:, 0] = points[:, 0]
@@ -274,7 +282,7 @@ class CropRect(CropBase):
             self.shape = self.create_shape(self.points)
 
     def finish_crop(self):
-        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
+        mask = self.create_empty_mask()
         points = np.array(self.points)
         points = points.reshape(len(points) // 2, 2)
         points[:, 0] = points[:, 0]
@@ -328,7 +336,7 @@ class CropCircle(CropBase):
         return x0, y0, r
 
     def finish_crop(self):
-        mask = np.zeros_like(self.im[:, :, 0], dtype=np.uint8)
+        mask = self.create_empty_mask()
         cv2.circle(mask, (int(self.xc), int(self.yc)), int(self.r),
                    [255, 255, 255], thickness=-1)
         xmin = int(self.xc - self.r)

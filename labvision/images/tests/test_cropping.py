@@ -36,6 +36,16 @@ class TestCropCircle(TestCase):
         result = input('Enter 1 if worked, 0 otherwise : ')
         self.assertTrue(result == str(1))
 
+    def test_crop_grayscale_image(self):
+        filepath = os.path.join(data_dir, "maxresdefault.jpg")
+        im = images.read_img(filepath)
+        im = images.bgr_to_gray(im)
+        result = images.crop_circle(im)
+        im = images.crop_and_mask(im, result.bbox, result.mask)
+        images.display(im)
+        result = input('Enter 1 if worked, 0 otherwise : ')
+        self.assertTrue(result == str(1))
+
 class TestCropRectangle(TestCase):
     def test_crop_image(self):
         filepath = os.path.join(data_dir, "maxresdefault.jpg")
@@ -44,6 +54,16 @@ class TestCropRectangle(TestCase):
         print(images.width_and_height(im))
         im = images.crop_and_mask(im, result.bbox, result.mask)
         print(images.width_and_height(im))
+        images.display(im)
+        result = input('Enter 1 if worked, 0 otherwise : ')
+        self.assertTrue(result == str(1))
+
+    def test_crop_grayscale_image(self):
+        filepath = os.path.join(data_dir, "maxresdefault.jpg")
+        im = images.read_img(filepath)
+        im = images.bgr_to_gray(im)
+        result = images.crop_rectangle(im)
+        im = images.crop_and_mask(im, result.bbox, result.mask)
         images.display(im)
         result = input('Enter 1 if worked, 0 otherwise : ')
         self.assertTrue(result == str(1))
