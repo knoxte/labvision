@@ -170,7 +170,7 @@ class CropBase:
     def reset(self):
         self.points = []
         for i in range(len(self.selections)):
-            self.remove_selection(-1*(i+1))
+            self.remove_selection(-1)
         if self.shape is not None:
             self.image_viewer.scene.removeItem(self.shape)
         self.shape = self.create_shape()
