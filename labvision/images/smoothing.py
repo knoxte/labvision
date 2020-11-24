@@ -23,7 +23,6 @@ def gaussian_blur(img, kernel=(3, 3)):
     out: output image
         Same size and type as img
     """
-    print(np.shape(img))
     out = cv2.GaussianBlur(img, kernel, 0)
     return out
 
@@ -47,6 +46,5 @@ def median_blur(img, kernel=3):
     out: output image
         Same size and type as img
     """
-    print(kernel)
     out = cv2.medianBlur(img, kernel)
     return out
