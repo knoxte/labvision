@@ -3,8 +3,7 @@ import random
 from PIL import Image, ImageTk
 import numpy as np
 
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider, QCheckBox
-from PySide2.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QCheckBox
 
 from qtwidgets import QImageViewer, QCustomSlider
 

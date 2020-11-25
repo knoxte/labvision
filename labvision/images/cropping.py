@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 from .draw import draw_filled_polygon
-from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QErrorMessage, QLabel
-from PySide2.QtCore import Qt, QPointF, QRectF
-from PySide2.QtGui import QPolygonF, QPen
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QErrorMessage, QLabel
+from PyQt5.QtCore import Qt, QPointF, QRectF
+from PyQt5.QtGui import QPolygonF, QPen
 from qtwidgets import QImageViewer
 import sys
 
@@ -180,10 +180,11 @@ class CropBase:
             self.finish_crop()
             self.app.exit()
         except Exception as e:
-            raise Exception(e)
+
             error = QErrorMessage(self.window)
             error.setWindowTitle("Cropping Error")
             error.showMessage("Select more points")
+            raise Exception(e)
 
 
 
