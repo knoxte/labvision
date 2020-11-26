@@ -14,7 +14,8 @@ class TestCircleGuiGray(TestCase):
         print('GRAY')
         filepath = os.path.join(data_dir, "maxresdefault.jpg")
         im = images.read_img(filepath, True)
-        images.CircleGui(im)
+        images.CircleGui(im, rmax=500)
+        print('Finished')
 
 
 class TestThresholdGui(TestCase):

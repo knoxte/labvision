@@ -39,14 +39,14 @@ class ThresholdGui(ParamGui):
 
 
 class CircleGui(ParamGui):
-    def __init__(self, img):
+    def __init__(self, img, rmax=50):
         self.grayscale = True
         self.param_dict = {
-            'distance': [25, 3, 51, 2],
+            'distance': [25, 3, 2*rmax, 2],
             'thresh1': [200, 0, 255, 1],
             'thresh2': [5, 0, 20, 1],
-            'min_rad': [17, 3, 50, 1],
-            'max_rad': [19, 3, 50, 1]
+            'min_rad': [17, 3, rmax, 1],
+            'max_rad': [19, 3, rmax, 1]
         }
         ParamGui.__init__(self, img)
 
@@ -56,7 +56,11 @@ class CircleGui(ParamGui):
                                self.param_dict['thresh2'][0],
                                self.param_dict['min_rad'][0],
                                self.param_dict['max_rad'][0])
-        self._display_img(draw_circles(gray_to_bgr(self.im0), circles))
+        if len(circles) > 0:
+            self._display_img(draw_circles(gray_to_bgr(self.im0), circles))
+        else:
+
+            self._display_img(gray_to_bgr(self.im0))
 
 
 class AdaptiveThresholdGui(ParamGui):
