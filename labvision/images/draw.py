@@ -61,7 +61,11 @@ def draw_circles(im, circles, color=YELLOW, thickness=2):
 
     assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
     assert len(circles) > 0, "Circles must not be empty"
-    assert np.shape(circles)[1] == 3, "Circles must contain x, y, and r"
+    if len(np.shape(circles)) == 1:
+        assert len(circles) == 3, "Circles must contain x, y, and r"
+        circles = [circles]
+    else:
+        assert np.shape(circles)[1] == 3, "Circles must contain x, y, and r"
     for x, y, rad in circles:
         cv2.circle(im, (int(x), int(y)), int(rad), color, thickness)
     return im
