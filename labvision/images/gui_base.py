@@ -80,9 +80,10 @@ class ParamGui:
         for key in sorted(self.param_dict.keys()):
             params = self.param_dict[key]
             val, bottom, top, step = params
+            isodd = odd(bottom) and even(step)
             slider = QCustomSlider(
                 parent=self.window, title=key, min_=bottom, max_=top, value_=val,
-                return_func=self.slider_callback, odd=True, spinbox=True)
+                return_func=self.slider_callback, odd=isodd, spinbox=True)
             self.vbox.addWidget(slider)
             self.sliders[key] = slider
 
@@ -125,3 +126,12 @@ class ParamGui:
 
     def update_im(self):
         self.image_viewer.setImage(self.im)
+
+
+def odd(a):
+    assert type(a) == int, 'Only ints can be odd'
+    return a % 2 == 1
+
+def even(a):
+    assert type(a) == int, 'Only ints can be even'
+    return a % 2 == 0
