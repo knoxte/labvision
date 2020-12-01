@@ -73,8 +73,8 @@ class ParamGui:
 
         if self.type in ['list', 'vid']:
             self.frame_slider = QCustomSlider(
-                self.window, title='frame', min_=0, max_=self.num_frames-1, spinbox=True,
-                return_func=self.frame_slider_update)
+                self.window, title='frame', min_=0, max_=self.num_frames-1, spinbox=True)
+            self.frame_slider.valueChanged.connect(self.frame_slider_update)
             self.vbox.addWidget(self.frame_slider)
 
         for key in sorted(self.param_dict.keys()):
@@ -83,7 +83,8 @@ class ParamGui:
             isodd = odd(bottom) and even(step)
             slider = QCustomSlider(
                 parent=self.window, title=key, min_=bottom, max_=top, value_=val,
-                return_func=self.slider_callback, odd=isodd, spinbox=True)
+                odd=isodd, spinbox=True)
+            slider.valueChanged.connect(self.slider_callback)
             self.vbox.addWidget(slider)
             self.sliders[key] = slider
 
