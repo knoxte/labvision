@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QCheckBox
 from qtwidgets import QImageViewer, QCustomSlider
 
 
-from ..video import ReadVideo
+import labvision.video as video
 from ..images import gray_to_bgr
 from .geometric import *
 
@@ -28,13 +28,13 @@ class ParamGui:
         self.init_ui()
 
     def parse_source(self, source):
-        assert isinstance(source, ReadVideo) or isinstance(source, list) or isinstance(source, np.ndarray), \
+        assert isinstance(source, video.ReadVideo) or isinstance(source, list) or isinstance(source, np.ndarray), \
             "source must be a ReadVideo, list or numpy array instance"
         if isinstance(source, np.ndarray):
             self.im = source
             self.type = 'im'
 
-        if isinstance(source, ReadVideo):
+        if isinstance(source, video.ReadVideo):
             self.vid = source
             self.frame_no = 0
             self.num_frames = self.vid.num_frames
