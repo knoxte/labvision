@@ -79,7 +79,7 @@ class ReadVideo:
 
     def _detect_file_type(self):
         self.ext = os.path.splitext(self.filename)[1]
-        if self.ext in ['.MP4', '.mp4', '.m4v', '.avi']:
+        if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv']:
             self.filetype = 'video'
         else:
             raise NotImplementedError('File extension is not implemented')

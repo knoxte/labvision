@@ -1,6 +1,6 @@
 import os
 from unittest import TestCase
-from labvision import data_dir, video
+from labvision import data_dir, video, images
 import numpy as np
 
 videopath = os.path.join(data_dir, 'SampleVideo.mp4')
