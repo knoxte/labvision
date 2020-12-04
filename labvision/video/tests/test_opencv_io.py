@@ -4,6 +4,7 @@ from labvision import data_dir, video
 import numpy as np
 
 videopath = os.path.join(data_dir, 'SampleVideo.mp4')
+mkvpath = os.path.join(data_dir, 'SampleVideo.mkv')
 
 
 class TestReadVideo(TestCase):
@@ -16,3 +17,8 @@ class TestReadVideo(TestCase):
         vid = video.ReadVideo(videopath)
         for frame in vid[:2]:
             self.assertTrue(type(frame) == np.ndarray)
+
+    def test_read_mkv(self):
+        vid = video.ReadVideo(mkvpath)
+        frame = vid.read_next_frame()
+        self.assertTrue(type(frame) == np.ndarray)
