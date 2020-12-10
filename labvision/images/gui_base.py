@@ -80,10 +80,9 @@ class ParamGui:
         for key in sorted(self.param_dict.keys()):
             params = self.param_dict[key]
             val, bottom, top, step = params
-            isodd = odd(bottom) and even(step)
             slider = QCustomSlider(
                 parent=self.window, title=key, min_=bottom, max_=top, value_=val,
-                odd=isodd, spinbox=True)
+                step_=step, spinbox=True)
             slider.valueChanged.connect(self.slider_callback)
             self.vbox.addWidget(slider)
             self.sliders[key] = slider
