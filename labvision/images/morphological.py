@@ -82,7 +82,7 @@ def erode(img, kernel=(3, 3), kernel_type=None, iterations=1):
     return out
 
 
-def closing(img, kernel=(3, 3)):
+def closing(img, kernel=(3, 3), iterations=1):
     """
     Performs a dilation followed by an erosion
 
@@ -100,7 +100,7 @@ def closing(img, kernel=(3, 3)):
         Same size and type as img
 
     """
-    out = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+    out = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel, iterations=iterations)
     return out
 
 

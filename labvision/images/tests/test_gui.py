@@ -2,6 +2,12 @@ from unittest import TestCase
 from labvision import data_dir, images
 import os
 
+class TestOpeningGui(TestCase):
+    def test_circle_image(self):
+        filepath = os.path.join(data_dir, "maxresdefault.jpg")
+        im = images.read_img(filepath)
+        images.OpeningGui(im)
+
 
 class TestCircleGui(TestCase):
     def test_circle_image(self):

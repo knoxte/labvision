@@ -7,6 +7,7 @@ from .draw import *
 from .colors import *
 from .smoothing import *
 from .contours import *
+from .morphological import *
 
 
 __all__ = [
@@ -17,6 +18,10 @@ __all__ = [
     "InrangeGui",
     "CannyGui",
     "ContoursGui",
+    "OpeningGui",
+    "ClosingGui",
+    "ErosionGui",
+    "DilationGui"
 ]
 
 
@@ -37,6 +42,67 @@ class ThresholdGui(ParamGui):
                                         value=self.param_dict['threshold'][0],
                                         mode=cv2.THRESH_BINARY_INV))
 
+class OpeningGui(ParamGui):
+    def __init__(self, im):
+        self.grayscale = True
+        self.param_dict = {
+            'kernel': [3, 1, 99, 2],
+            'iterations': [1, 1, 20, 1]
+        }
+        ParamGui.__init__(self, im)
+
+    def update(self):
+        self._display_img(opening(self.im0,
+                                  kernel=(self.param_dict['kernel'][0], self.param_dict['kernel'][0]),
+                                  iterations=self.param_dict['iterations'][0]))
+
+
+class ClosingGui(ParamGui):
+    def __init__(self, im):
+        self.grayscale = True
+        self.param_dict = {
+            'kernel': [3, 1, 99, 2],
+            'iterations': [1, 1, 20, 1]
+        }
+        ParamGui.__init__(self, im)
+
+    def update(self):
+        self._display_img(closing(self.im0,
+                                  kernel=(self.param_dict['kernel'][0],
+                                          self.param_dict['kernel'][0]),
+                                  iterations=self.param_dict['iterations'][0]))
+
+
+class ErosionGui(ParamGui):
+    def __init__(self, im):
+        self.grayscale = True
+        self.param_dict = {
+            'kernel': [3, 1, 99, 2],
+            'iterations': [1, 1, 20, 1]
+        }
+        ParamGui.__init__(self, im)
+
+    def update(self):
+        self._display_img(erode(self.im0,
+                                  kernel=(self.param_dict['kernel'][0],
+                                          self.param_dict['kernel'][0]),
+                                  iterations=self.param_dict['iterations'][0]))
+
+
+class DilationGui(ParamGui):
+    def __init__(self, im):
+        self.grayscale = True
+        self.param_dict = {
+            'kernel': [3, 1, 99, 2],
+            'iterations': [1, 1, 20, 1]
+        }
+        ParamGui.__init__(self, im)
+
+    def update(self):
+        self._display_img(dilate(self.im0,
+                                  kernel=(self.param_dict['kernel'][0],
+                                          self.param_dict['kernel'][0]),
+                                  iterations=self.param_dict['iterations'][0]))
 
 class CircleGui(ParamGui):
     def __init__(self, img, rmax=50):
