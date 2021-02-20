@@ -75,7 +75,7 @@ class ReadVideo:
         self.set_frame(self.frame_num)
         self.return_func = return_function
         
-    def set_frame_range(frame_range):
+    def set_frame_range(self, frame_range):
         self.frame_range = (frame_range[0], self.num_frames, frame_range[2]) if (frame_range[1] == None) else frame_range        
 
     def _detect_file_type(self):
