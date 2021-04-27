@@ -43,13 +43,25 @@ def mean(ims):
     return np.uint8(im)
 
 
-def display(image, title='', resolution=(960, 540)):
-    """Uses cv2 to display an image then wait for a button press"""
+    
+
+def display(image, title='', resolution=(960, 540)):        
+    """Uses cv2 to display an image then wait for a button press
+    pts is either None or an integer specifying the number of point 
+    and click events you'd like to capture"""
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
     cv2.resizeWindow(title, *resolution)
+ 
+    display_points = []
+    def left_mouse_click(event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            display_points.append((x,y))        
+    cv2.setMouseCallback(title,left_mouse_click)
+    
     cv2.imshow(title, image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    return display_points
 
 
 def plot(im):
