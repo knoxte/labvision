@@ -151,10 +151,8 @@ class ReadVideo:
             index specifying the frame
         :return: None
         """
-
-        if n != self.frame_num:
-            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
-            self.frame_num = n
+        self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
+        self.frame_num = n
 
     def read_next_frame(self):
         """
