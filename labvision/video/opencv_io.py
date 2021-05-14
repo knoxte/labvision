@@ -70,7 +70,7 @@ class ReadVideo:
         self._detect_file_type()
         self.init_video()
         self.get_vid_props()
-        self.frame_num = self.frame_range[0]
+        self.frame_num = frame_range[0]
         self.set_frame_range(frame_range)
         self.return_func = return_function
         
