@@ -72,7 +72,6 @@ class ReadVideo:
         self.get_vid_props()
         self.frame_num = self.frame_range[0]
         self.set_frame_range(frame_range)
-        self.set_frame(self.frame_num)
         self.return_func = return_function
         
     def set_frame_range(self, frame_range):
@@ -81,7 +80,8 @@ class ReadVideo:
             self.frame_num = self.frame_range[0]
         elif self.frame_num >= self.frame_range[1]:
             self.frame_num = self.frame_range[1] - 1
-
+        self.set_frame(self.frame_num)
+            
     def _detect_file_type(self):
         self.ext = os.path.splitext(self.filename)[1]
         if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv']:
