@@ -75,11 +75,7 @@ class ReadVideo:
         self.return_func = return_function
         
     def set_frame_range(self, frame_range):
-        self.frame_range = (frame_range[0], self.num_frames, frame_range[2]) if (frame_range[1] == None) else frame_range#
-        if self.frame_num < self.frame_range[0]:
-            self.frame_num = self.frame_range[0]
-        elif self.frame_num >= self.frame_range[1]:
-            self.frame_num = self.frame_range[1] - 1
+        self.frame_range = (frame_range[0], self.num_frames, frame_range[2]) if (frame_range[1] == None) else frame_range
         self.set_frame(self.frame_num)
             
     def _detect_file_type(self):
@@ -151,8 +147,13 @@ class ReadVideo:
             index specifying the frame
         :return: None
         """
-        self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
         self.frame_num = n
+        if self.frame_num < self.frame_range[0]:
+            self.frame_num = self.frame_range[0]
+        elif self.frame_num >= self.frame_range[1]:
+            self.frame_num = self.frame_range[1] - 1
+        self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
+        
 
     def read_next_frame(self):
         """
@@ -167,8 +168,7 @@ class ReadVideo:
 
         ret, im = self.vid.read()
         self.frame_num += self.frame_range[2]
-        if self.frame_range[2] != 1:
-            self.set_frame(self.frame_num)
+        self.set_frame(self.frame_num)
 
         if ret:
             if self.grayscale:
