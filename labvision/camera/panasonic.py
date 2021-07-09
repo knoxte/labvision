@@ -2,13 +2,9 @@ from labvision.camera import CameraBase
 import os
 import cv2
 import subprocess
-from subprocess import PIPE, run
 import time
 import numpy as np
-from labvision.images import Displayer, display
-from sh import gphoto2
-from PIL import Image
-from io import StringIO
+from labvision.images import Displayer
 
 
 class Panasonic(CameraBase):
