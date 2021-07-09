@@ -4,8 +4,11 @@ import cv2
 import subprocess
 from subprocess import PIPE, run
 import time
+import numpy as np
 from labvision.images import Displayer, display
 from sh import gphoto2
+from PIL import Image
+from io import StringIO
 
 
 class Panasonic(CameraBase):
@@ -65,29 +68,15 @@ class Panasonic(CameraBase):
         filename = self.save_frame(filename)
         return cv2.imread(filename)
 
-    # def preview(self):
-    #     window = Displayer('Camera')
-    #     loop = True
-    #     while loop:
-    #         frame = self.get_frame()
-    #         window.update_im(frame)
-    #         if not window.active:
-    #             loop = False
-
     def preview(self):
-        # im = os.system('gphoto2 --show-preview')
-        # frame = cv2.imread(im)
-        # display(frame, 'Current frame')
-        def out(command):
-            result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-            return result.stdout
-
-        my_output = out('gphoto2 --capture-preview')
-        # frame = cv2.imread(my_output)
-        # display(frame, 'Current frame')
-        print(my_output)
+        window = Displayer('Camera')
+        loop = True
+        while loop:
+            proc = subprocess.Popen(["gphoto2 --capture-preview --stdout"], stdout=subprocess.PIPE, shell=True)
+            (out, err) = proc.communicate()
+            frame = cv2.imdecode(np.frombuffer(out, np.uint8), -1)
+            window.update_im(frame)
+            if not window.active:
+                loop = False
 
 
-
-# Or
-# my_output = out(["echo", "hello world"])
