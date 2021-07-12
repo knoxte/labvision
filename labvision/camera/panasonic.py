@@ -4,7 +4,7 @@ import cv2
 import subprocess
 import time
 import numpy as np
-from labvision.images import Displayer
+from labvision.images import Displayer, display
 
 
 class Panasonic(CameraBase):
@@ -18,6 +18,7 @@ class Panasonic(CameraBase):
     """
     def __init__(self, cam_type='Panasonic'):
         super(Panasonic, self).__init__(cam_type=cam_type)
+        self.kill_process()
 
     def kill_process(self):
         # kill the gphoto2 process at power on
@@ -41,28 +42,24 @@ class Panasonic(CameraBase):
 
         return filename
 
-    def start_movie(self, duration=None, filename=None, time_stamp=False, not_started=True):
-        filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.mp4'
-
-        if not_started:
-            a = subprocess.Popen('gphoto2 --capture-image', shell=True)
-
-        if duration:
-            time.sleep(duration)
-            os.system('killall -9 gphoto2')
-            os.system('gphoto2 --capture-image-and-download --filename ' + filename)
-
-    def stop_movie(self, filename=None):
-        self.start_movie(duration=0.1, filename=filename, not_started=False)
-
-    def save_frame(self, filename=None, time_stamp=None):
-        filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.jpg'
-        os.system('gphoto2 --capture-image-and-download --filename ' + filename)
-        return filename
-
-    def get_frame(self, filename=None):
-        filename = self.save_frame(filename)
-        return cv2.imread(filename)
+    # def start_movie(self, duration=None, filename=None, time_stamp=False, not_started=True):
+    #     filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.mp4'
+    #
+    #     if not_started:
+    #         a = subprocess.Popen('gphoto2 --capture-image', shell=True)
+    #
+    #     if duration:
+    #         time.sleep(duration)
+    #         os.system('killall -9 gphoto2')
+    #         os.system('gphoto2 --capture-image-and-download --filename ' + filename)
+    #
+    # def stop_movie(self, filename=None):
+    #     self.start_movie(duration=0.1, filename=filename, not_started=False)
+    #
+    # def save_frame(self, filename=None, time_stamp=False):
+    #     filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.jpg'
+    #     os.system('gphoto2 --capture-image-and-download --filename ' + filename)
+    #     return filename
 
     def preview(self):
         window = Displayer('Camera')
@@ -75,4 +72,40 @@ class Panasonic(CameraBase):
             if not window.active:
                 loop = False
 
+    def initialise(self):
+        pass
 
+    def list_files(self):
+        pass
+
+    def delete_files(self, all_files=False):
+        pass
+
+    def take_frame(self):
+        pass
+
+    def save_frame(self, filename=None, time_stamp=False):
+        filename = self.get_filename(filename=filename, time_stamp=time_stamp)
+
+        pass
+
+    def frame(self, filename=None, save=False, time_stamp=False):
+        self.take_frame()
+        if save:
+            self.save_frame()
+
+    def start_movie(self, duration=None, filename=None, time_stamp=False, not_started=True, save=False):
+        filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.mp4'
+
+        if not_started:
+            self.take_frame()
+
+        if duration:
+            time.sleep(duration)
+            self.take_frame()
+
+        if save:
+            self.save_frame()
+
+    def stop_movie(self, filename=None, save=False):
+        self.start_movie(duration=0.1, filename=filename, not_started=False, save=save)

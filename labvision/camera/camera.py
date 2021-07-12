@@ -28,6 +28,8 @@ class CameraBase:
         pass
 
     def get_frame(self):
+        frame = cv2.imread(filename)
+        display(frame)
         pass
 
     def preview(self):
@@ -41,9 +43,7 @@ class CameraBase:
                 loop = False
 
     def show_frame(self):
-        # Base
-        frame = self.get_frame()
-        display(frame, 'Current frame')
+        pass
 
     def _timestamp(self):
         shot_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
