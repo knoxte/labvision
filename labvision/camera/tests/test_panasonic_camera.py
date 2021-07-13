@@ -5,7 +5,8 @@ import subprocess
 import os
 import cv2
 
-cam1 = camera.Panasonic()
+# cam1 = camera.Panasonic()
+# cam1.communicate()
 
 # cam1.save_frame(filename='test.jpg')
 # cam1.start_movie(filename='test')
@@ -18,13 +19,3 @@ cam1 = camera.Panasonic()
 
 # cam1.show_frame('test.jpg')
 
-
-# pro = subprocess.Popen(['gphoto2 --shell'],
-#                        stdin=subprocess.PIPE,
-#                        stdout=subprocess.PIPE,
-#                        stderr=subprocess.PIPE)
-# inpt = 'capture-image'
-# out, err = pro.communicate(inpt.encode())
-
-# os.system('gphoto2 --shell')
-# os.system('capture-image')

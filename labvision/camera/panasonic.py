@@ -5,6 +5,7 @@ import subprocess
 import time
 import numpy as np
 from labvision.images import Displayer, display
+from sh import gphoto2
 
 
 class Panasonic(CameraBase):
@@ -86,7 +87,6 @@ class Panasonic(CameraBase):
 
     def save_frame(self, filename=None, time_stamp=False):
         filename = self.get_filename(filename=filename, time_stamp=time_stamp)
-
         pass
 
     def frame(self, filename=None, save=False, time_stamp=False):
@@ -109,3 +109,15 @@ class Panasonic(CameraBase):
 
     def stop_movie(self, filename=None, save=False):
         self.start_movie(duration=0.1, filename=filename, not_started=False, save=save)
+        p = subprocess.Popen(['gphoto2 --capture-image'], stdout=subprocess.PIPE)
+        output = p.communicate()[0].split(b'\r\n')[1:-1]
+        print(output)
+
+    def communicate(self):
+        p = subprocess.Popen(['gphoto2', '--capture-image'], stdout=subprocess.PIPE)
+        time.sleep(1)
+        p.kill()
+        p = subprocess.Popen(['gphoto2', '--shell'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+        out, err = p.communicate(input='capture-image')
+        file_location = out[92:-56]
+        print('file location is ' + file_location)
