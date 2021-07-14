@@ -108,7 +108,7 @@ class Panasonic(CameraBase):
                 print(file_list)
         return file_list
 
-    def delete_files(self, all_files=False):
+    def delete_files(self, all_files=False, file_list=None):
         if all_files:
             file_list = self.list_files(print_list=False)
         file_location = '/store_00010001/DCIM/100_PANA'
@@ -117,8 +117,12 @@ class Panasonic(CameraBase):
             for i in range(len(a)):
                 self.child.sendline('delete ' + file_location + '/' + a[i])
                 self.child.expect(' ')
+            print('Deleted file(s) from camera')
         else:
-            print('There are no files to delete')
+            if all_files:
+                print('There are no files to delete')
+            else:
+                print('Please input a file to delete')
 
     def take_frame(self):
         self.child.sendline('capture-image')
@@ -128,18 +132,20 @@ class Panasonic(CameraBase):
         return file_name
 
     def save_frame(self, filename=None, cam_filename=None, time_stamp=False, all_files=False):
-        filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.JPG'
+        filename = self.get_filename(filename=filename, time_stamp=time_stamp)
         file_location = '/store_00010001/DCIM/100_PANA/'
         self.child.sendline('get ' + file_location + cam_filename)
         self.child.expect('Saving file')
-        # os.system('cd /home/ppypn4/PycharmProjects/labvision/labvision/camera/tests')
         os.system('mv ' + cam_filename + ' ' + filename)
         print('File saved on computer as ' + filename)
 
-    def frame(self, filename=None, save=False, time_stamp=False):
-        self.take_frame()
+    def frame(self, filename=None, save=False, delete=False, time_stamp=False):
+        cam_filename = self.take_frame()
         if save:
-            self.save_frame()
+            self.save_frame(cam_filename=cam_filename, filename=filename, time_stamp=time_stamp)
+        if delete:
+            self.delete_files(file_list=cam_filename)
+
 
     def start_movie(self, duration=None, filename=None, time_stamp=False, not_started=True, save=False):
         filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.mp4'
