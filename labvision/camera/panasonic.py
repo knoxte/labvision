@@ -5,7 +5,8 @@ import subprocess
 import time
 import numpy as np
 from labvision.images import Displayer, display
-from sh import gphoto2
+import pexpect
+import re
 
 
 class Panasonic(CameraBase):
@@ -17,9 +18,16 @@ class Panasonic(CameraBase):
     ----------
     duration : int or None  Recording length in seconds
     """
-    def __init__(self, cam_type='Panasonic'):
+
+    def __init__(self, cam_type='Panasonic', mode='Picture'):
         super(Panasonic, self).__init__(cam_type=cam_type)
         self.kill_process()
+        if mode == 'Picture':
+            self.pic_initialise()
+            print('Camera is in picture mode')
+        if mode == 'Movie':
+            self.movie_initialise()
+            print('Camera is in movie mode')
 
     def kill_process(self):
         # kill the gphoto2 process at power on
@@ -73,13 +81,28 @@ class Panasonic(CameraBase):
             if not window.active:
                 loop = False
 
-    def initialise(self):
+    def pic_initialise(self):
+        self.child = pexpect.spawn('gphoto2 --shell')
+        self.child.sendline('capture-image')
+        self.child.expect(' on the camera')
+        file_name = self.child.before.decode().split('location ')[1]
+        file_location = '/store_00010001/DCIM/100_PANA'
+        self.child.sendline('delete ' + file_name)
+        self.child.expect('')
+        return file_location
+
+    def movie_initialise(self):
         pass
 
     def list_files(self):
-        pass
+        file_location = '/store_00010001/DCIM/100_PANA'
+        self.child.sendline('ls ' + file_location)
+        self.child.expect('/P.+JPG  ')
+        print(self.child.after.decode().split('/store_00010001/DCIM/100_PANA')[3])
 
     def delete_files(self, all_files=False):
+        file_location, child = self.pic_initialise()
+
         pass
 
     def take_frame(self):
@@ -114,10 +137,15 @@ class Panasonic(CameraBase):
         print(output)
 
     def communicate(self):
-        p = subprocess.Popen(['gphoto2', '--capture-image'], stdout=subprocess.PIPE)
+        a = subprocess.Popen(['gphoto2', '--capture-image'], stdout=subprocess.PIPE)
         time.sleep(1)
-        p.kill()
-        p = subprocess.Popen(['gphoto2', '--shell'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
-        out, err = p.communicate(input='capture-image')
-        file_location = out[92:-56]
-        print('file location is ' + file_location)
+        a.kill()
+        p = subprocess.Popen(['gphoto2', '--shell'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        query1 = 'capture-image'
+        query2 = 'summary'
+        concat_query = "{}\n{}".format(query1, query2)
+        print(p.communicate(input=concat_query.encode('utf-8'))[0])
+        # out, err = p.communicate(input='capture-image')
+        # p.stdin.write('capture-image')
+        # file_location = out[92:-56]
+        # print('file location is ' + file_location)
