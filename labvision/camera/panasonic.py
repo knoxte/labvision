@@ -125,11 +125,16 @@ class Panasonic(CameraBase):
         self.child.expect(' on the camera')
         file_name = self.child.before.decode().split('100_PANA/')[-1]
         print('The image is saved as ' + file_name + ' on the camera')
-        pass
+        return file_name
 
-    def save_frame(self, filename=None, time_stamp=False):
-        filename = self.get_filename(filename=filename, time_stamp=time_stamp)
-        pass
+    def save_frame(self, filename=None, cam_filename=None, time_stamp=False, all_files=False):
+        filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.JPG'
+        file_location = '/store_00010001/DCIM/100_PANA/'
+        self.child.sendline('get ' + file_location + cam_filename)
+        self.child.expect('Saving file')
+        # os.system('cd /home/ppypn4/PycharmProjects/labvision/labvision/camera/tests')
+        os.system('mv ' + cam_filename + ' ' + filename)
+        print('File saved on computer as ' + filename)
 
     def frame(self, filename=None, save=False, time_stamp=False):
         self.take_frame()

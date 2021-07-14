@@ -8,7 +8,7 @@ import os
 import cv2
 #
 cam1 = camera.Panasonic()
-cam1.take_frame()
+cam1.save_frame(filename='test5', cam_filename='P1000635.JPG')
 
 
 
