@@ -82,7 +82,7 @@ class Panasonic(CameraBase):
                 loop = False
 
     def pic_initialise(self):
-        self.child = pexpect.spawn('gphoto2 --shell')
+        self.child = pexpect.spawn('gphoto2 --shell', timeout=10)
         self.child.sendline('capture-image')
         self.child.expect(' on the camera')
         file_name = self.child.before.decode().split('location ')[1]
@@ -94,16 +94,31 @@ class Panasonic(CameraBase):
     def movie_initialise(self):
         pass
 
-    def list_files(self):
+    def list_files(self, print_list=True):
         file_location = '/store_00010001/DCIM/100_PANA'
         self.child.sendline('ls ' + file_location)
-        self.child.expect('/P.+JPG  ')
-        print(self.child.after.decode().split('/store_00010001/DCIM/100_PANA')[3])
+        index = self.child.expect(['P10.+JPG  ', '/P10.+JPG  ', pexpect.TIMEOUT])
+        if index == 2:
+            if print_list:
+                print('There are no files')
+            file_list = None
+        if index == 0 or index == 1:
+            file_list = self.child.after.decode().split('/store_00010001/DCIM/100_PANA')[-1]
+            if print_list:
+                print(file_list)
+        return file_list
 
     def delete_files(self, all_files=False):
-        file_location, child = self.pic_initialise()
-
-        pass
+        if all_files:
+            file_list = self.list_files(print_list=False)
+        file_location = '/store_00010001/DCIM/100_PANA'
+        if file_list:
+            a = re.findall(r'[\w.]+', file_list)
+            for i in range(len(a)):
+                self.child.sendline('delete ' + file_location + '/' + a[i])
+                self.child.expect(' ')
+        else:
+            print('There are no files to delete')
 
     def take_frame(self):
         pass
