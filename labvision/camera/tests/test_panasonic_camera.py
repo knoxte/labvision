@@ -8,8 +8,7 @@ import os
 import cv2
 #
 cam1 = camera.Panasonic()
-cam1.list_files()
-cam1.delete_files(all_files=True)
+cam1.take_frame()
 
 
 

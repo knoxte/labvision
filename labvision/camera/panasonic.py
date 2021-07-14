@@ -82,10 +82,10 @@ class Panasonic(CameraBase):
                 loop = False
 
     def pic_initialise(self):
-        self.child = pexpect.spawn('gphoto2 --shell', timeout=10)
+        self.child = pexpect.spawn('gphoto2 --shell', timeout=15)
         self.child.sendline('capture-image')
         self.child.expect(' on the camera')
-        file_name = self.child.before.decode().split('location ')[1]
+        file_name = self.child.before.decode().split('location ')[-1]
         file_location = '/store_00010001/DCIM/100_PANA'
         self.child.sendline('delete ' + file_name)
         self.child.expect('')
@@ -121,6 +121,10 @@ class Panasonic(CameraBase):
             print('There are no files to delete')
 
     def take_frame(self):
+        self.child.sendline('capture-image')
+        self.child.expect(' on the camera')
+        file_name = self.child.before.decode().split('100_PANA/')[-1]
+        print('The image is saved as ' + file_name + ' on the camera')
         pass
 
     def save_frame(self, filename=None, time_stamp=False):
