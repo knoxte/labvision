@@ -58,11 +58,20 @@ class Panasonic(CameraBase):
         return filename
 
     def movie_initialise(self):
-        pass
+        self.start_movie(first=True, duration=2)
+        self.delete_file()
+
+
+    def take_frame(self):
+        self.gphoto2_shell.sendline('capture-image')
+        self.gphoto2_shell.expect(' on the camera')
+        filename = self.gphoto2_shell.before.decode().split('100_PANA/')[-1]
+        self.current_file = filename
+        return filename
 
     def list_files(self, print_list=True):
         self.gphoto2_shell.sendline('ls ' + self.file_location)
-        index = self.gphoto2_shell.expect(['P10.+JPG  ', '/P10.+JPG  ', pexpect.TIMEOUT])
+        index = self.gphoto2_shell.expect(['P10.+JPG  ', 'P10.+MP4  ', pexpect.TIMEOUT])
         if index == 2:
             if print_list:
                 print('There are no files')
@@ -74,7 +83,9 @@ class Panasonic(CameraBase):
                 print(file_list)
         return file_list
 
-    def delete_file(self, file=self.current_file):
+    def delete_file(self, file=None):
+        if file is None:
+            file = self.current_file
         self.gphoto2_shell.sendline('delete ' + self.file_location + file)
         self.gphoto2_shell.expect(' ')
 
@@ -84,9 +95,15 @@ class Panasonic(CameraBase):
         for file in file_list:
             self.delete_file(file=file)
 
-    def save_file(self, file=self.current_file, saved_filename=self._timestamp):
+    def save_file(self, file=None, saved_filename=None):
+        if saved_filename is None:
+            print(self._timestamp())
+            saved_filename = self._timestamp()
+        if file is None:
+            file = self.current_file
+        print('get ' + self.file_location + file)
         self.gphoto2_shell.sendline('get ' + self.file_location + file)
-        self.gphoto2_shell.expect('Saving file')
+        self.gphoto2_shell.expect('Saving')
         os.system('mv ' + file + ' ' + saved_filename)
 
     def save_multiple_files(self, all_files=False, file_list=None):
@@ -95,19 +112,21 @@ class Panasonic(CameraBase):
         for file in file_list:
             self.save_file(file=file)
 
-    def take_frame(self):
+    def start_movie(self, duration=None, first=False):
+        if first is False:
+            self.gphoto2_shell.close()
+        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
         self.gphoto2_shell.sendline('capture-image')
-        self.gphoto2_shell.expect(' on the camera')
-        filename = self.gphoto2_shell.before.decode().split('100_PANA/')[-1]
-        self.current_file = filename
-        return filename
-
-    def start_movie(self, duration=None, filename=self._timestamp, not_started=True, save=False):
-        if not_started:
-            self.take_frame()
+        time.sleep(1)
+        self.gphoto2_shell.close()
+        time.sleep(1)
+        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
         if duration:
             time.sleep(duration)
-            self.take_frame()
+            self.stop_movie()
 
-    def stop_movie(self, filename=None, save=False):
-        self.start_movie(duration=0.1, filename=filename, not_started=False, save=save)
+    def stop_movie(self):
+        self.gphoto2_shell.sendline('capture-image')
+        self.gphoto2_shell.expect('on the camera')
+        filename = self.gphoto2_shell.before.decode().split('100_PANA/')[-1]
+        self.current_file = filename
