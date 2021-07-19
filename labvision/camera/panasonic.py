@@ -52,12 +52,14 @@ class Panasonic(CameraBase):
                 loop = False
 
     def pic_initialise(self):
+        # allows the gphoto2 shell to access files on the camera while in picture mode
         self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
         filename = self.take_frame()
         self.delete_file(file=filename)
         return filename
 
     def movie_initialise(self):
+        # allows the gphoto2 shell to access files on the camera while in movie mode
         self.start_movie(first=True, duration=2)
         self.delete_file()
 
@@ -97,11 +99,9 @@ class Panasonic(CameraBase):
 
     def save_file(self, file=None, saved_filename=None):
         if saved_filename is None:
-            print(self._timestamp())
             saved_filename = self._timestamp()
         if file is None:
             file = self.current_file
-        print('get ' + self.file_location + file)
         self.gphoto2_shell.sendline('get ' + self.file_location + file)
         self.gphoto2_shell.expect('Saving')
         os.system('mv ' + file + ' ' + saved_filename)

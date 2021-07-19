@@ -24,12 +24,10 @@ class CameraBase:
     def stop_movie(self):
         pass
 
-    def save_frame(self):
+    def take_frame(self):
         pass
 
-    def get_frame(self):
-        frame = cv2.imread(filename)
-        display(frame)
+    def save_frame(self):
         pass
 
     def preview(self):
