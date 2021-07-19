@@ -22,6 +22,7 @@ class Panasonic(CameraBase):
     def __init__(self, cam_type='Panasonic', mode='Picture'):
         super(Panasonic, self).__init__(cam_type=cam_type)
         self.kill_process()
+        self.file_location = '/store_00010001/DCIM/100_PANA/'
         if mode == 'Picture':
             self.pic_initialise()
             print('Camera is in picture mode')
@@ -39,37 +40,6 @@ class Panasonic(CameraBase):
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
 
-    def get_filename(self, filename=None, time_stamp=False):
-        if filename is None:
-            time_stamp = True
-            filename = ''
-        else:
-            filename = filename.split('.')[0]
-
-        if time_stamp:
-            filename = filename + self._timestamp()
-
-        return filename
-
-    # def start_movie(self, duration=None, filename=None, time_stamp=False, not_started=True):
-    #     filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.mp4'
-    #
-    #     if not_started:
-    #         a = subprocess.Popen('gphoto2 --capture-image', shell=True)
-    #
-    #     if duration:
-    #         time.sleep(duration)
-    #         os.system('killall -9 gphoto2')
-    #         os.system('gphoto2 --capture-image-and-download --filename ' + filename)
-    #
-    # def stop_movie(self, filename=None):
-    #     self.start_movie(duration=0.1, filename=filename, not_started=False)
-    #
-    # def save_frame(self, filename=None, time_stamp=False):
-    #     filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.jpg'
-    #     os.system('gphoto2 --capture-image-and-download --filename ' + filename)
-    #     return filename
-
     def preview(self):
         window = Displayer('Camera')
         loop = True
@@ -82,100 +52,62 @@ class Panasonic(CameraBase):
                 loop = False
 
     def pic_initialise(self):
-        self.child = pexpect.spawn('gphoto2 --shell', timeout=15)
-        self.child.sendline('capture-image')
-        self.child.expect(' on the camera')
-        file_name = self.child.before.decode().split('location ')[-1]
-        file_location = '/store_00010001/DCIM/100_PANA'
-        self.child.sendline('delete ' + file_name)
-        self.child.expect('')
-        return file_location
+        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
+        filename = self.take_frame()
+        self.delete_file(file=filename)
+        return filename
 
     def movie_initialise(self):
         pass
 
     def list_files(self, print_list=True):
-        file_location = '/store_00010001/DCIM/100_PANA'
-        self.child.sendline('ls ' + file_location)
-        index = self.child.expect(['P10.+JPG  ', '/P10.+JPG  ', pexpect.TIMEOUT])
+        self.gphoto2_shell.sendline('ls ' + self.file_location)
+        index = self.gphoto2_shell.expect(['P10.+JPG  ', '/P10.+JPG  ', pexpect.TIMEOUT])
         if index == 2:
             if print_list:
                 print('There are no files')
-            file_list = None
+        file_list = None
         if index == 0 or index == 1:
-            file_list = self.child.after.decode().split('/store_00010001/DCIM/100_PANA')[-1]
+            file_string = self.gphoto2_shell.after.decode().split('/store_00010001/DCIM/100_PANA')[-1]
+            file_list = re.findall(r'[\w.]+', file_string)
             if print_list:
                 print(file_list)
         return file_list
 
-    def delete_files(self, all_files=False, file_list=None):
+    def delete_file(self, file=self.current_file):
+        self.gphoto2_shell.sendline('delete ' + self.file_location + file)
+        self.gphoto2_shell.expect(' ')
+
+    def delete_multiple_files(self, all_files=False, file_list=None):
         if all_files:
             file_list = self.list_files(print_list=False)
-        file_location = '/store_00010001/DCIM/100_PANA'
-        if file_list:
-            a = re.findall(r'[\w.]+', file_list)
-            for i in range(len(a)):
-                self.child.sendline('delete ' + file_location + '/' + a[i])
-                self.child.expect(' ')
-            print('Deleted file(s) from camera')
-        else:
-            if all_files:
-                print('There are no files to delete')
-            else:
-                print('Please input a file to delete')
+        for file in file_list:
+            self.delete_file(file=file)
+
+    def save_file(self, file=self.current_file, saved_filename=self._timestamp):
+        self.gphoto2_shell.sendline('get ' + self.file_location + file)
+        self.gphoto2_shell.expect('Saving file')
+        os.system('mv ' + file + ' ' + saved_filename)
+
+    def save_multiple_files(self, all_files=False, file_list=None):
+        if all_files:
+            file_list = self.list_files(print_list=False)
+        for file in file_list:
+            self.save_file(file=file)
 
     def take_frame(self):
-        self.child.sendline('capture-image')
-        self.child.expect(' on the camera')
-        file_name = self.child.before.decode().split('100_PANA/')[-1]
-        print('The image is saved as ' + file_name + ' on the camera')
-        return file_name
+        self.gphoto2_shell.sendline('capture-image')
+        self.gphoto2_shell.expect(' on the camera')
+        filename = self.gphoto2_shell.before.decode().split('100_PANA/')[-1]
+        self.current_file = filename
+        return filename
 
-    def save_frame(self, filename=None, cam_filename=None, time_stamp=False, all_files=False):
-        filename = self.get_filename(filename=filename, time_stamp=time_stamp)
-        file_location = '/store_00010001/DCIM/100_PANA/'
-        self.child.sendline('get ' + file_location + cam_filename)
-        self.child.expect('Saving file')
-        os.system('mv ' + cam_filename + ' ' + filename)
-        print('File saved on computer as ' + filename)
-
-    def frame(self, filename=None, save=False, delete=False, time_stamp=False):
-        cam_filename = self.take_frame()
-        if save:
-            self.save_frame(cam_filename=cam_filename, filename=filename, time_stamp=time_stamp)
-        if delete:
-            self.delete_files(file_list=cam_filename)
-
-
-    def start_movie(self, duration=None, filename=None, time_stamp=False, not_started=True, save=False):
-        filename = self.get_filename(filename=filename, time_stamp=time_stamp) + '.mp4'
-
+    def start_movie(self, duration=None, filename=self._timestamp, not_started=True, save=False):
         if not_started:
             self.take_frame()
-
         if duration:
             time.sleep(duration)
             self.take_frame()
 
-        if save:
-            self.save_frame()
-
     def stop_movie(self, filename=None, save=False):
         self.start_movie(duration=0.1, filename=filename, not_started=False, save=save)
-        p = subprocess.Popen(['gphoto2 --capture-image'], stdout=subprocess.PIPE)
-        output = p.communicate()[0].split(b'\r\n')[1:-1]
-        print(output)
-
-    def communicate(self):
-        a = subprocess.Popen(['gphoto2', '--capture-image'], stdout=subprocess.PIPE)
-        time.sleep(1)
-        a.kill()
-        p = subprocess.Popen(['gphoto2', '--shell'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        query1 = 'capture-image'
-        query2 = 'summary'
-        concat_query = "{}\n{}".format(query1, query2)
-        print(p.communicate(input=concat_query.encode('utf-8'))[0])
-        # out, err = p.communicate(input='capture-image')
-        # p.stdin.write('capture-image')
-        # file_location = out[92:-56]
-        # print('file location is ' + file_location)
