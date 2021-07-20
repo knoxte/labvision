@@ -53,7 +53,7 @@ class Panasonic(CameraBase):
 
     def pic_initialise(self):
         # allows the gphoto2 shell to access files on the camera while in picture mode
-        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
+        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         filename = self.take_frame()
         self.delete_file(file=filename)
         return filename
@@ -91,8 +91,8 @@ class Panasonic(CameraBase):
         self.gphoto2_shell.sendline('delete ' + self.file_location + file)
         self.gphoto2_shell.expect(' ')
 
-    def delete_multiple_files(self, all_files=False, file_list=None):
-        if all_files:
+    def delete_multiple_files(self, file_list='All'):
+        if file_list == 'All':
             file_list = self.list_files(print_list=False)
         for file in file_list:
             self.delete_file(file=file)
@@ -106,8 +106,8 @@ class Panasonic(CameraBase):
         self.gphoto2_shell.expect('Saving')
         os.system('mv ' + file + ' ' + saved_filename)
 
-    def save_multiple_files(self, all_files=False, file_list=None):
-        if all_files:
+    def save_multiple_files(self, all_files=False, file_list='All'):
+        if file_list == 'All':
             file_list = self.list_files(print_list=False)
         for file in file_list:
             self.save_file(file=file)
@@ -115,12 +115,12 @@ class Panasonic(CameraBase):
     def start_movie(self, duration=None, first=False):
         if first is False:
             self.gphoto2_shell.close()
-        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
+        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         self.gphoto2_shell.sendline('capture-image')
         time.sleep(1)
         self.gphoto2_shell.close()
         time.sleep(1)
-        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell', timeout=15)
+        self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         if duration:
             time.sleep(duration)
             self.stop_movie()
