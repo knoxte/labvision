@@ -40,17 +40,6 @@ class Panasonic(CameraBase):
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
 
-    def preview(self):
-        window = Displayer('Camera')
-        loop = True
-        while loop:
-            proc = subprocess.Popen(["gphoto2 --capture-preview --stdout"], stdout=subprocess.PIPE, shell=True)
-            (out, err) = proc.communicate()
-            frame = cv2.imdecode(np.frombuffer(out, np.uint8), -1)
-            window.update_im(frame)
-            if not window.active:
-                loop = False
-
     def pic_initialise(self):
         # allows the gphoto2 shell to access files on the camera while in picture mode
         self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
@@ -62,7 +51,6 @@ class Panasonic(CameraBase):
         # allows the gphoto2 shell to access files on the camera while in movie mode
         self.start_movie(first=True, duration=2)
         self.delete_file()
-
 
     def take_frame(self):
         self.gphoto2_shell.sendline('capture-image')
