@@ -41,7 +41,7 @@ def get_com_and_midpoint(im):
     cropped_im = crop_image_to_contour(threshold_image, rect)
     colour_cropped = crop_image_to_contour(original_image, rect)
 
-    midpoint = (int(colour_cropped.shape[0]/2), int(colour_cropped.shape[1]/2))
+    midpoint = (int(colour_cropped.shape[0] / 2), int(colour_cropped.shape[1] / 2))
 
     inverted_im = cv2.bitwise_not(cropped_im)
     com = images.center_of_mass(inverted_im)
@@ -56,8 +56,8 @@ def get_com_and_midpoint(im):
 def motor_combos(com, midpoint):
     xdiff = midpoint[0] - com[0]
     ydiff = midpoint[1] - com[1]
-    magnitude = np.sqrt(xdiff**2+ydiff**2)
-    duration = 3*magnitude
+    magnitude = np.sqrt(xdiff ** 2 + ydiff ** 2)
+    duration = 3 * magnitude
     if xdiff > 0:
         print('+i')
     if xdiff < 0:
@@ -71,6 +71,7 @@ def motor_combos(com, midpoint):
 
 
 motorbox = "/dev/serial/by-id/usb-Arduino__www.arduino.cc__0043_55735323935351809202-if00"
+
 
 class PushButtons():
     def __init__(self):
@@ -91,9 +92,9 @@ class PushButtons():
 def motor_commands(command, duration):
     motors = PushButtons()
     if command == '+i':
-        this = camera.QuickTimer()
+        this = camera.QuickTimer(time_list)
         motors.move_motor(1, 'f')
-        motors.move_motor(2. 'f')
+        motors.move_motor(2, 'f')
 
 
 test1 = PushButtons()
