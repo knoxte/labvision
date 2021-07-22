@@ -93,6 +93,7 @@ class Panasonic(CameraBase):
         self.gphoto2_shell.sendline('get ' + self.file_location + file)
         self.gphoto2_shell.expect('Saving')
         os.system('mv ' + file + ' ' + saved_filename)
+        return saved_filename
 
     def save_multiple_files(self, all_files=False, file_list='All'):
         if file_list == 'All':
