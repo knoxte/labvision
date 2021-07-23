@@ -3,10 +3,9 @@ import os
 import cv2
 import subprocess
 import time
-import numpy as np
-from labvision.images import Displayer, display
 import pexpect
 import re
+import datetime
 
 
 class Panasonic(CameraBase):
@@ -21,13 +20,13 @@ class Panasonic(CameraBase):
 
     def __init__(self, cam_type='Panasonic', mode='Picture'):
         super(Panasonic, self).__init__(cam_type=cam_type)
-        self.kill_process()
+        # self.kill_process()
         self.file_location = '/store_00010001/DCIM/100_PANA/'
         if mode == 'Picture':
-            self.pic_initialise()
+            self._pic_initialise()
             print('Camera is in picture mode')
         if mode == 'Movie':
-            self.movie_initialise()
+            self._movie_initialise()
             print('Camera is in movie mode')
 
     def kill_process(self):
@@ -40,17 +39,17 @@ class Panasonic(CameraBase):
                 pid = int(line.split(None, 1)[0])
                 os.kill(pid, signal.SIGKILL)
 
-    def pic_initialise(self):
+    def _pic_initialise(self):
         # allows the gphoto2 shell to access files on the camera while in picture mode
         self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         filename = self.take_frame()
-        self.delete_file(file=filename)
+        self.delete_file_from_computer(file=filename)
         return filename
 
-    def movie_initialise(self):
+    def _movie_initialise(self):
         # allows the gphoto2 shell to access files on the camera while in movie mode
         self.start_movie(first=True, duration=2)
-        self.delete_file()
+        self.delete_file_from_computer()
 
     def take_frame(self):
         self.gphoto2_shell.sendline('capture-image')
@@ -58,6 +57,15 @@ class Panasonic(CameraBase):
         filename = self.gphoto2_shell.before.decode().split('100_PANA/')[-1]
         self.current_file = filename
         return filename
+
+    def get_frame(self, delete=False):
+        self.take_frame()
+        filename = self.save_file_onto_computer()
+        self.delete_file_from_computer()
+        im = cv2.imread(filename)
+        if delete:
+            os.remove(filename)
+        return im
 
     def list_files(self, print_list=True):
         self.gphoto2_shell.sendline('ls ' + self.file_location)
@@ -73,21 +81,21 @@ class Panasonic(CameraBase):
                 print(file_list)
         return file_list
 
-    def delete_file(self, file=None):
+    def delete_file_from_computer(self, file=None):
         if file is None:
             file = self.current_file
         self.gphoto2_shell.sendline('delete ' + self.file_location + file)
         self.gphoto2_shell.expect(' ')
 
-    def delete_multiple_files(self, file_list='All'):
+    def delete_multiple_files_from_computer(self, file_list='All'):
         if file_list == 'All':
             file_list = self.list_files(print_list=False)
         for file in file_list:
-            self.delete_file(file=file)
+            self.delete_file_from_computer(file=file)
 
-    def save_file(self, file=None, saved_filename=None):
+    def save_file_onto_computer(self, file=None, saved_filename=None):
         if saved_filename is None:
-            saved_filename = self._timestamp()
+            saved_filename = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         if file is None:
             file = self.current_file
         self.gphoto2_shell.sendline('get ' + self.file_location + file)
@@ -95,11 +103,11 @@ class Panasonic(CameraBase):
         os.system('mv ' + file + ' ' + saved_filename)
         return saved_filename
 
-    def save_multiple_files(self, all_files=False, file_list='All'):
+    def save_multiple_files_onto_computer(self, all_files=False, file_list='All'):
         if file_list == 'All':
             file_list = self.list_files(print_list=False)
         for file in file_list:
-            self.save_file(file=file)
+            self.save_file_onto_computer(file=file)
 
     def start_movie(self, duration=None, first=False):
         if first is False:

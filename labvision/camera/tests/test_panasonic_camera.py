@@ -9,7 +9,8 @@ import cv2
 
 cam1 = camera.Panasonic()
 cam1.take_frame()
-cam1.save_file(saved_filename='box')
+filename = cam1.save_file_onto_computer()
+print(filename)
 
 
 # cam2 = camera.Panasonic(mode='Movie')
