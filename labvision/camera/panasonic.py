@@ -43,13 +43,13 @@ class Panasonic(CameraBase):
         # allows the gphoto2 shell to access files on the camera while in picture mode
         self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         filename = self.take_frame()
-        self.delete_file_from_computer(file=filename)
+        self.delete_file_from_camera(file=filename)
         return filename
 
     def _movie_initialise(self):
         # allows the gphoto2 shell to access files on the camera while in movie mode
         self.start_movie(first=True, duration=2)
-        self.delete_file_from_computer()
+        self.delete_file_from_camera()
 
     def take_frame(self):
         self.gphoto2_shell.sendline('capture-image')
@@ -61,7 +61,7 @@ class Panasonic(CameraBase):
     def get_frame(self, delete=False):
         self.take_frame()
         filename = self.save_file_onto_computer()
-        self.delete_file_from_computer()
+        self.delete_file_from_camera()
         im = cv2.imread(filename)
         if delete:
             os.remove(filename)
@@ -81,17 +81,17 @@ class Panasonic(CameraBase):
                 print(file_list)
         return file_list
 
-    def delete_file_from_computer(self, file=None):
+    def delete_file_from_camera(self, file=None):
         if file is None:
             file = self.current_file
         self.gphoto2_shell.sendline('delete ' + self.file_location + file)
         self.gphoto2_shell.expect(' ')
 
-    def delete_multiple_files_from_computer(self, file_list='All'):
+    def delete_multiple_files_from_camera(self, file_list='All'):
         if file_list == 'All':
             file_list = self.list_files(print_list=False)
         for file in file_list:
-            self.delete_file_from_computer(file=file)
+            self.delete_file_from_camera(file=file)
 
     def save_file_onto_computer(self, file=None, saved_filename=None):
         if saved_filename is None:

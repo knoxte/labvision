@@ -7,14 +7,13 @@ import os
 
 from .camera import CameraBase
 
-
 class DigitalCamera(CameraBase):
     def __init__(self, cam_type='NIKON_DSCOOLPIX_9600'):
         super(DigitalCamera, self).__init__(cam_type=cam_type)
 
     def kill_process(self):
-        # kill the gphoto2 process at power on
-        p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+        #kill the gphoto2 process at power on
+        p = subprocess.Popen(['ps','-A'],stdout=subprocess.PIPE)
         out, err = p.communicate()
 
         for line in out.splitlines():
@@ -35,7 +34,7 @@ class DigitalCamera(CameraBase):
             filename, ext = filename.split('.')
             filename + self._timestamp() + '.' + ext
 
-        gphoto2(['--capture-image-and-download', '--filename', 'test5.jpg'])
+        gphoto2('--capture-image-and-download --filename ' + filename)
 
         return filename
 
