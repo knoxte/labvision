@@ -43,4 +43,3 @@ class DigitalCamera(CameraBase):
         time.sleep(1)
         p = subprocess.Popen([settings_script], stdout=subprocess.PIPE)
         time.sleep(2)
-

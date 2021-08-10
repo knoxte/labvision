@@ -1,66 +1,10 @@
 from .camera_config import *
+from .camera import CameraBase
 from ..images import Displayer, display, save
 import datetime
 import cv2
 import sys
 import os
-
-
-class CameraBase:
-    """
-    Camera is a simple base class that handles some of the operations common
-    to different types of cameras. Its child classes are Camera which handles webcams.
-    and DigitalCamera in digital_camera.py which handles digital cameras.
-    """
-    def __init__(self, cam_type):
-        self.cam_type=cam_type
-
-
-    def set_property(self, property=None, value=None):
-        try:
-            self.set(property, value)
-        except:
-            raise CamPropsError(property)
-
-    def get_property(self, property=None):
-        try:
-            self.get(property)
-        except:
-            raise CamPropsError(property)
-
-    def _timestamp(self):
-        shot_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        return shot_time
-
-    def show_frame(self):
-        # Base
-        frame = self.get_frame()
-        display(frame, 'Current frame')
-
-    def preview(self):
-        # Base
-        window = Displayer('Camera')
-        loop = True
-        while loop:
-            frame = self.get_frame()
-            window.update_im(frame)
-            if not window.active:
-                loop = False
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if True:
-            return self.get_frame()
-        else:
-            raise StopIteration
 
 
 
@@ -72,6 +16,7 @@ class WebCamera(CameraBase):
     are described in camera_config.py. Each camera has a
     dictionary of basic settings. If you use a new camera add
     it to that file and give it a name in capitals.
+
     Parameters
     ----------
     cam_num : int or None   Defines the camera to which the instance points
@@ -80,11 +25,17 @@ class WebCamera(CameraBase):
     Values are in position Zero in the Dict['frame_size']
     fps : int    Only needs to be defined if you want a non-default value. Default
     Values are in position Zero in the Dict['fps']
+
+
     Examples
     --------
     webcam = Camera(cam_type=EXAMPLE_CAMERA)
+
     img = webcam.get_frame()
+
     webcam.save_frame(filename, time_stamp=True)
+
+
     '''
     def __init__(self, cam_num=None, cam_type=LOGITECH_HD_1080P, frame_size=None, fps=None, ):
 
