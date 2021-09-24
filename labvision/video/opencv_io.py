@@ -200,11 +200,11 @@ class ReadVideo:
 
         if ret:
             if self.grayscale:
-                return images.bgr_to_gray(im)
+                im = images.bgr_to_gray(im)
             if self.return_func:
-                return self.return_func(im)
-            else:
-                return im
+                im = self.return_func(im)
+
+            return im.copy()
         else:
             raise Exception('Cannot read frame')
 
