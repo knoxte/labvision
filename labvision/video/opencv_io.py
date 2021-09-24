@@ -8,8 +8,6 @@ from .. import images
 __all__ = ['ReadVideo','WriteVideo']
 
 
-
-
 @Slicerator.from_class
 class ReadVideo:
     """Reading Videos class is designed to wrap
@@ -64,20 +62,28 @@ class ReadVideo:
 
     """
 
-    def __init__(self, filename=None, grayscale=False, frame_range=(0,None,1), return_function=None):
+    def __init__(self, filename=None, grayscale=False,
+                 frame_range=(0, None, 1), return_function=None):
         self.filename = filename
         self.grayscale = grayscale
         self._detect_file_type()
         self.init_video()
         self.get_vid_props()
-        self.frame_num = frame_range[0]
+        self.frame_num = 0
+        self.vid_position = 0
         self.set_frame_range(frame_range)
         self.return_func = return_function
-        
+        self.cached_frame = None
+        self.cached_frame_number = None
+
     def set_frame_range(self, frame_range):
-        self.frame_range = (frame_range[0], self.num_frames, frame_range[2]) if (frame_range[1] == None) else frame_range
-        self.set_frame(self.frame_num)
-            
+        self.frame_range = (
+        frame_range[0], self.num_frames, frame_range[2]) if (
+                    frame_range[1] == None) else frame_range
+        self.frame_num = frame_range[0]
+        if self.frame_num != self.vid_position:
+            self.set_frame(self.frame_num)
+
     def _detect_file_type(self):
         self.ext = os.path.splitext(self.filename)[1]
         if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv']:
@@ -111,16 +117,16 @@ class ReadVideo:
         self.codec = self.vid.get(cv2.CAP_PROP_FOURCC)
         self.file_extension = self.filename.split('.')[1]
 
-        self.properties = { 'frame_num' : self.frame_num,
-            'num_frames' : self.num_frames,
-            'width' : self.width,
-            'height':self.height,
-            'colour' : self.colour,
-            'frame_size' : self.frame_size,
-            'fps':self.fps,
-            'codec':self.codec,
-            'format':self.format,
-            'file_extension':self.file_extension}
+        self.properties = {'frame_num': self.frame_num,
+                           'num_frames': self.num_frames,
+                           'width': self.width,
+                           'height': self.height,
+                           'colour': self.colour,
+                           'frame_size': self.frame_size,
+                           'fps': self.fps,
+                           'codec': self.codec,
+                           'format': self.format,
+                           'file_extension': self.file_extension}
 
     def read_frame(self, n=None):
         """
@@ -132,7 +138,6 @@ class ReadVideo:
         | :return: np.ndarray
         |    returns specified image
         """
-
         if n is None:
             return self.read_next_frame()
         else:
@@ -147,13 +152,28 @@ class ReadVideo:
             index specifying the frame
         :return: None
         """
-        self.frame_num = n
-        if self.frame_num < self.frame_range[0]:
-            self.frame_num = self.frame_range[0]
-        elif self.frame_num >= self.frame_range[1]:
-            self.frame_num = self.frame_range[1] - 1
-        self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
-        
+
+        if n != self.frame_num:
+            self.frame_num = n
+            if self.frame_num < self.frame_range[0]:
+                self.frame_num = self.frame_range[0]
+            elif self.frame_num >= self.frame_range[1]:
+                self.frame_num = self.frame_range[1] - 1
+            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
+
+        if n == self.vid_position:
+            pass
+        elif n == self.cached_frame_number:
+            pass
+        else:
+            self.frame_num = n
+            if self.frame_num < self.frame_range[0]:
+                self.frame_num = self.frame_range[0]
+            elif self.frame_num >= self.frame_range[1]:
+                self.frame_num = self.frame_range[1] - 1
+            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
+            self.vid_position = n
+
 
     def read_next_frame(self):
         """
@@ -163,12 +183,20 @@ class ReadVideo:
         """
         assert (self.frame_num >= self.frame_range[0]) & \
                (self.frame_num < self.frame_range[1]) & \
-               ((self.frame_num - self.frame_range[0]) % self.frame_range[2] == 0),\
-                'Frame not in range'
+               ((self.frame_num - self.frame_range[0]) % self.frame_range[
+                   2] == 0), \
+            'Frame not in range'
 
-        ret, im = self.vid.read()
+        if self.frame_num == self.cached_frame_number:
+            ret = True
+            im = self.cached_frame
+        elif self.frame_num == self.vid_position:
+            ret, im = self._read()
+        else:
+            self.set_frame(self.frame_num)
+            ret, im = self._read()
+
         self.frame_num += self.frame_range[2]
-        self.set_frame(self.frame_num)
 
         if ret:
             if self.grayscale:
@@ -179,6 +207,13 @@ class ReadVideo:
                 return im
         else:
             raise Exception('Cannot read frame')
+
+    def _read(self):
+        ret, im = self.vid.read()
+        self.cached_frame = im
+        self.cached_frame_number = self.vid_position
+        self.vid_position += 1
+        return ret, im
 
     def close(self):
         """Closes video object"""
@@ -210,7 +245,6 @@ class ReadVideo:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
-
 
 
 class WriteVideo:
