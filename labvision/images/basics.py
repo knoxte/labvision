@@ -45,7 +45,7 @@ def mean(ims):
 
     
 
-def display(image, title='', resolution=(960, 540)):        
+def display(image, title=' ', resolution=(960, 540)):        
     """Uses cv2 to display an image then wait for a button press
     pts is either None or an integer specifying the number of point 
     and click events you'd like to capture"""
