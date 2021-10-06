@@ -152,27 +152,19 @@ class ReadVideo:
             index specifying the frame
         :return: None
         """
-
-        if n != self.frame_num:
+        if n == self.cached_frame_number:
             self.frame_num = n
-            if self.frame_num < self.frame_range[0]:
-                self.frame_num = self.frame_range[0]
-            elif self.frame_num >= self.frame_range[1]:
-                self.frame_num = self.frame_range[1] - 1
-            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
-
-        if n == self.vid_position:
-            pass
-        elif n == self.cached_frame_number:
-            pass
+        elif n == self.vid_position:
+            self.frame_num = n
         else:
             self.frame_num = n
             if self.frame_num < self.frame_range[0]:
                 self.frame_num = self.frame_range[0]
             elif self.frame_num >= self.frame_range[1]:
                 self.frame_num = self.frame_range[1] - 1
-            self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
-            self.vid_position = n
+            if self.frame_num != self.vid_position:
+                self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
+                self.vid_position = n
 
 
     def read_next_frame(self):
