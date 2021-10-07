@@ -94,7 +94,7 @@ class WebCamera(CameraBase):
         self.cam = cv2.VideoCapture(cam_num)
         self.set = self.cam.set
         self.get = self.cam.get
-        super(Camera, self).__init__(cam_type)
+        super(WebCamera, self).__init__(cam_type)
 
         frame_sizes = cam_type['res']
         frame_rates = cam_type['fps']
