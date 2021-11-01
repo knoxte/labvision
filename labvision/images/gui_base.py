@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QCheckBox
 from qtwidgets import QImageViewer, QCustomSlider
 
 
-import labvision.video as video
+from .. import video
 from ..images import gray_to_bgr
 from .geometric import *
 
