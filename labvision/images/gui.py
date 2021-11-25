@@ -196,7 +196,7 @@ class CannyGui(ParamGui):
         self.grayscale = True
         self.param_dict = {'p1': [1, 0, 255, 1],
                            'p2': [1, 0, 255, 1],
-                          'aperture':[3,1,21,2]}
+                          'aperture':[3,3,7,2]}
         ParamGui.__init__(self, img)
 
     def update(self):
