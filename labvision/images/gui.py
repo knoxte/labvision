@@ -195,13 +195,15 @@ class CannyGui(ParamGui):
     def __init__(self, img):
         self.grayscale = True
         self.param_dict = {'p1': [1, 0, 255, 1],
-                           'p2': [1, 0, 255, 1]}
+                           'p2': [1, 0, 255, 1],
+                          'aperture':[3,1,21,2]}
         ParamGui.__init__(self, img)
 
     def update(self):
         self.im = cv2.Canny(self.im0,
                             self.param_dict['p1'][0],
-                            self.param_dict['p2'][0])
+                            self.param_dict['p2'][0],
+                           apertureSize=self.param_dict['aperture'][0])
 
 
 class ContoursGui(ParamGui):
