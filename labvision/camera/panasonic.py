@@ -12,15 +12,21 @@ import datetime
 class Panasonic:
     """
     This class is for Panasonic cameras. In order to take photos or movies, the camera must be far enough away from any
-    objects so that it can autofocus or the code will hang.
+    objects so that it can autofocus or the code will hang. The code
+    also requires access to gphoto2 which only seems to be available for linux and Mac
     """
 
-    def __init__(self, mode='Picture'):
+    def __init__(self, mode='Picture',folder=None):
         self.file_location = '/store_00010001/DCIM/100_PANA/'
+        self.folder = folder
         if mode == 'Picture':
+            if folder is None:
+                self.folder = '~/Pictures/'
             self._pic_initialise()
             print('Camera is in picture mode')
         if mode == 'Movie':
+            if folder is None:
+                self.folder = '~/Videos/' 
             self._movie_initialise()
             print('Camera is in movie mode')
 
@@ -80,14 +86,12 @@ class Panasonic:
             for file in file_list:
                 self.delete_file_from_camera(file=file)
 
-    def save_file_onto_computer(self, file=None, saved_filename=None):
+    def save_file_onto_computer(self, saved_filename=None):
         if saved_filename is None:
             saved_filename = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        if file is None:
-            file = self.current_file
         self.gphoto2_shell.sendline('get ' + self.file_location + file)
         self.gphoto2_shell.expect('Saving')
-        os.system('mv ' + file + ' ' + saved_filename)
+        os.system('mv ' + self.folder + ' ' + saved_filename)
         return saved_filename
 
     def save_multiple_files_onto_computer(self, all_files=False, file_list='All'):
