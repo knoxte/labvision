@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 from slicerator import Slicerator
+from filehandling import BatchProcess
 from .. import images
 
 
@@ -321,3 +322,49 @@ class WriteVideo:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.close()
+
+
+def suffix_generator(i, num_figs=5):
+    """Creates a number suffix as string
+    e.g 00005"""
+
+    num_digits = len(str(i))
+    assert num_figs >= num_digits, 'num digits is greater than requested length of suffix'
+
+    suffix = '0'*(num_figs-num_digits) + str(i)
+    return suffix
+
+
+def video_to_imgs(videoname, image_filename_stub, ext='.png'):
+    """
+    Function to disassemble video into images
+    
+    videoname   :   full path to video including extension
+    image_filename_stub :   filename stub for all the images (full path)
+    ext :   type of image extension, defaults to png
+    """
+    readvid = ReadVideo(videoname)
+    for i, img in enumerate(readvid):
+        suffix = suffix_generator(i, num_figs=len(str(readvid.num_files)))
+        images.write_img(image_filename_stub + suffix + ext)
+
+
+def imgs_to_video(file_filter, videoname, sort=None):
+    """
+    Function to assemble images into a video
+    
+    file_filter :   full path including wild cards to specify images
+    videoname   :   full path to video including extension
+    sort        :   optional function handle to specify order of images
+    """
+    f = BatchProcess(file_filter, smart_sort=sort)
+
+    for i, filename in enumerate(f):
+        img = images.read_img(filename)
+        if i==0:
+            write_vid = WriteVideo(videoname,frame=img)
+        write_vid.add_frame(img)
+    write_vid.close()
+        
+
+    
