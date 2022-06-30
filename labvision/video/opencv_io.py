@@ -6,7 +6,7 @@ from filehandling import BatchProcess
 from .. import images
 
 
-__all__ = ['ReadVideo','WriteVideo']
+__all__ = ['ReadVideo','WriteVideo','video_to_imgs','imgs_to_video']
 
 
 @Slicerator.from_class
