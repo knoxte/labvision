@@ -295,7 +295,7 @@ class WriteVideo:
             fps,
             (self.frame_size[1], self.frame_size[0]))
 
-        assert self.vid.isOpened(), 'Video failed to open'
+        #assert self.vid.isOpened(), 'Video failed to open'
 
     def add_frame(self, im):
         """
