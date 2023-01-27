@@ -23,7 +23,8 @@ setuptools.setup(
         'slicerator',
         'ffmpeg-python',
         'moviepy',
-        'qtwidgets @ git+https://github.com/MikeSmithLabTeam/qtwidgets'
+        'qtwidgets @ git+https://github.com/MikeSmithLabTeam/qtwidgets',
+        'filehandling @ git+https://github.com/MikeSmithLabTeam/filehandling'
 
     ],
     test_suite='nose.collector',
