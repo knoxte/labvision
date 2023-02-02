@@ -87,7 +87,7 @@ class ReadVideo:
 
     def _detect_file_type(self):
         self.ext = os.path.splitext(self.filename)[1]
-        if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv']:
+        if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm']:
             self.filetype = 'video'
         else:
             raise NotImplementedError('File extension is not implemented')
@@ -167,7 +167,6 @@ class ReadVideo:
                 self.vid.set(cv2.CAP_PROP_POS_FRAMES, float(n))
                 self.vid_position = n
 
-
     def read_next_frame(self):
         """
         Reads the next available frame. Note depending on the range specified
@@ -190,7 +189,7 @@ class ReadVideo:
             ret, im = self._read()
 
         self.frame_num += self.frame_range[2]
-
+  
         if ret:
             if self.grayscale:
                 im = images.bgr_to_gray(im)

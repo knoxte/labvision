@@ -137,7 +137,9 @@ def write_img(img, filename):
     fully opaque pixels should have alpha set to 255
 
     """
-    cv2.imwrite(filename, img)
+    ret = cv2.imwrite(filename, img)
+    if not ret:
+        raise Exception('Could not write image')
 
 
 save = write_img
