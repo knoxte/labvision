@@ -18,14 +18,12 @@ class _ReadImgSeq:
     but differently numbered files in the folder.
     """
 
-    def __init__(self, filename):
-        self.ext = '.'+filename.split('.')[1]
+    def __init__(self, file_filter):
+        self.ext = '.'+file_filter.split('.')[1]
         
         assert  self.ext in ['.jpg','.png','.tiff'], 'Extension not recognised'
 
-        self.filename = filename
-        filter = self.filename.split('.')[0].rstrip('0123456789') + '*' + self.ext
-        self.files = BatchProcess(filter, smart_sort=smart_number_sort)
+        self.files = BatchProcess(file_filter, smart_sort=smart_number_sort)
         ret, im = self.read()
         self.set("",0)
         assert ret, 'Failed to read file'
@@ -79,24 +77,28 @@ class _ReadImgSeq:
 
 @Slicerator.from_class
 class ReadVideo:
-    """Reading Videos class is designed to wrap
+    """Reading Videos or image sequences class
+    
+    This is designed to wrap
     the OpenCV VideoCapture class and make it easier to
-    work with.
+    work with. It also works on a sequence of images through
+    combination of BatchProcess from the filehandling repo and cv2.imread. User can use both with same interface.
+
 
     Attributes
     ----------
     vid : instance
-        OpenCV VideoCapture instance
+        OpenCV VideoCapture instance or _ReadImgSeq instance depending on filetype
     filename : str
-        Full path and filename to video to read
+        Full path and filename to video or seq to read. If imgs supplying absolute path reads single img. Supplying path with wildcards ? * etc allows for pattern matching and selecting range of imgs.
     grayscale : bool
         True to read as grayscale
     frame_range : tuple
-        (start frame num, end frame num, step)
+        (start frame num, end frame num, step) - in an img sequence frame_num is defined as position in the sequence of read files
     frame_num : int
-        current frame pointed at in video
+        current frame pointed at in video or seq
     num_frames : int
-        number of frames in the video. If a range is selected this may not be accessible.
+        number of frames in the video or seq. If a range is selected this may not be accessible.
     width : int
         width of frame in pixels
     height : int
@@ -106,9 +108,9 @@ class ReadVideo:
     frame_size : tuple
         gives same format as np.shape
     fps : int
-        number of frames per second
+        number of frames per second - not defined for seq
     file_extension : str
-        file extension of the video. ReadVideo works with .mp4, .MP4, .m4v and '.avi'
+        file extension of the video. ReadVideo works with .mp4, .MP4, .m4v and '.avi' and seqs with .png, .jpg, .tiff
     properties: dict
         a dictionary of the parameters
 
@@ -157,7 +159,7 @@ class ReadVideo:
         self.ext = os.path.splitext(self.filename)[1]
         if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm']:
             self.filetype = 'video'
-        elif self.ext in ['.jpg','.png']:
+        elif self.ext in ['.jpg','.png', '.tiff']:
             self.filetype = 'img_seq'
         else:
             raise NotImplementedError('File extension is not implemented')
