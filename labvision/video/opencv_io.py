@@ -4,6 +4,10 @@ import numpy as np
 from slicerator import Slicerator
 from filehandling import BatchProcess, smart_number_sort
 from .. import images
+from typing import Optional, Tuple
+
+"""type hints"""
+FrameRange = Tuple[int, Optional[int], int]
 
 
 __all__ = ['ReadVideo','WriteVideo','video_to_imgs','imgs_to_video']
@@ -18,7 +22,7 @@ class _ReadImgSeq:
     but differently numbered files in the folder.
     """
 
-    def __init__(self, file_filter):
+    def __init__(self, file_filter : str):
         self.ext = '.'+file_filter.split('.')[1]
         
         assert  self.ext in ['.jpg','.png','.tiff'], 'Extension not recognised'
@@ -133,8 +137,8 @@ class ReadVideo:
 
     """
 
-    def __init__(self, filename=None, grayscale=False,
-                 frame_range=(0, None, 1), return_function=None):
+    def __init__(self, filename : Optional[str]=None, grayscale : bool=False,
+                 frame_range : FrameRange=(0, None, 1), return_function=None):
         self.filename = filename
         self.grayscale = grayscale
         self._detect_file_type()
@@ -147,7 +151,7 @@ class ReadVideo:
         self.cached_frame = None
         self.cached_frame_number = None
 
-    def set_frame_range(self, frame_range):
+    def set_frame_range(self, frame_range : FrameRange):
         self.frame_range = (
         frame_range[0], self.num_frames, frame_range[2]) if (
                     frame_range[1] == None) else frame_range

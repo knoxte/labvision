@@ -24,7 +24,7 @@ output_filename = os.path.join(data_dir, 'test.mp4')
 
 
 
-class TestVideo(TestCase):
+class TestReadVideo(TestCase):
     def test_read_video_frame_mp4(self):
         """Check working with mp4"""
         vid = video.ReadVideo(mp4_videopath)
@@ -80,6 +80,7 @@ class TestVideo(TestCase):
         frame = vid.read_next_frame()
         self.assertTrue(vid.num_frames == 1)
 
+class TestWriteVideo(TestCase):
     def test_write_video(self):
         test_img = cv2.imread(single_img)
         writevid = WriteVideo(output_filename, frame_size=(1080, 1920, 3))

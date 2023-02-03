@@ -1,1 +1,0 @@
-from labvision import camera

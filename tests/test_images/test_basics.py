@@ -8,7 +8,6 @@ import os
 class TestReadImg(TestCase):
     def test_read_jpg(self):
         filepath = os.path.join(data_dir, "SampleImage.jpg")
-        # filepath = pkg_resources.resource_filename(__name__, path)
         im = images.read_img(filepath)
         self.assertTrue(type(im) == np.ndarray)
         self.assertTrue(np.shape(im)[2] == 3)
