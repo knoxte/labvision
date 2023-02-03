@@ -72,8 +72,6 @@ class _ReadImgSeq:
                 return True
             else:
                 return False
-            
-        
 
     def release(self):
         pass
@@ -152,14 +150,17 @@ class ReadVideo:
         self.cached_frame_number = None
 
     def set_frame_range(self, frame_range : FrameRange):
-        self.frame_range = (
-        frame_range[0], self.num_frames, frame_range[2]) if (
-                    frame_range[1] == None) else frame_range
+        """set_frame_range limits the accessible frames in the video and the 
+        frames iterated over. frame_range is a tuple (start_index, finish_index, step size)"""
+        self.frame_range = (frame_range[0], self.num_frames, frame_range[2]) if ( frame_range[1] == None) else frame_range
         self.frame_num = frame_range[0]
         if self.frame_num != self.vid_position:
             self.set_frame(self.frame_num)
 
     def _detect_file_type(self):
+        """establishes the type of file based on file extension
+        this is used to select either video or img_seq internally
+        """
         self.ext = os.path.splitext(self.filename)[1]
         if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm']:
             self.filetype = 'video'
@@ -169,7 +170,7 @@ class ReadVideo:
             raise NotImplementedError('File extension is not implemented')
 
     def init_video(self):
-        """ Initialise video capture object"""
+        """ Initialise video capture object or img_sequence"""
         if self.filetype == 'video':
             self.vid = cv2.VideoCapture(self.filename)
         elif self.filetype == 'img_seq':
@@ -177,7 +178,7 @@ class ReadVideo:
 
     def get_vid_props(self):
         """
-        Get the properties of the video
+        Get the properties of the video or sequence
 
         :return: dict(properties)
         """
@@ -249,7 +250,10 @@ class ReadVideo:
     def read_next_frame(self):
         """
         Reads the next available frame. Note depending on the range specified
-        when instantiating object this may be step frames.
+        when instantiating object this may be step frames. To speed things up
+        if the requested frame is the previous accessed frame it accesses an image
+        cache rather than making a fresh call.
+        
         :return:
         """
         assert (self.frame_num >= self.frame_range[0]) & \
@@ -280,6 +284,8 @@ class ReadVideo:
             raise Exception('Cannot read frame')
 
     def _read(self):
+        """private method that reads next image. By caching the previous frame
+        this speeds up things in reading video"""
         ret, im = self.vid.read()
         self.cached_frame = im
         self.cached_frame_number = self.vid_position
