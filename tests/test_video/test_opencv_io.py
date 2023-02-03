@@ -1,5 +1,7 @@
 import os
 import sys
+
+from labvision.video.opencv_io import WriteVideo, suffix_generator
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
@@ -7,6 +9,7 @@ from unittest import TestCase
 import labvision.video as video
 import labvision.images as imgs
 import numpy as np
+import cv2
 
 data_dir = 'labvision/data/'
 
@@ -17,9 +20,11 @@ png_seqpath = os.path.join(data_dir, 'pngs/SampleVideo*.png')
 jpg_seqpath = os.path.join(data_dir, 'jpgs/SampleVideo*.jpg')
 tiff_seqpath = os.path.join(data_dir, 'tiffs/SampleVideo*.tiff')
 single_img = os.path.join(data_dir, 'pngs/SampleVideo1.png')
+output_filename = os.path.join(data_dir, 'test.mp4')
 
 
-class TestReadVideo(TestCase):
+
+class TestVideo(TestCase):
     def test_read_video_frame_mp4(self):
         """Check working with mp4"""
         vid = video.ReadVideo(mp4_videopath)
@@ -74,6 +79,17 @@ class TestReadVideo(TestCase):
         vid = video.ReadVideo(single_img)
         frame = vid.read_next_frame()
         self.assertTrue(vid.num_frames == 1)
+
+    def test_write_video(self):
+        test_img = cv2.imread(single_img)
+        writevid = WriteVideo(output_filename, frame_size=(1080, 1920, 3))
+        writevid.add_frame(test_img)
+        writevid.close()
+        self.assertTrue(os.path.exists(output_filename))
+        os.remove(output_filename)
+
+    def test_suffix_generator(self):
+        self.assertTrue(suffix_generator(5, num_figs=4) == '0005')
 
     
 
