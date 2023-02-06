@@ -6,16 +6,20 @@ sys.path.append('.')
 import labvision.video as labvid
 import labvision.images as labimg
 import cv2
+import numpy as np
 
-path='/home/ppzmis/Videos/'
-path2='home/ppzmis/Pictures/'
-filename = 'test.MP4'
 
-readvid = labvid.ReadVideo(path + filename)
+path='home/ppzmis/Videos/imgs/'
+vid = labvid.ReadVideo(filename='/home/ppzmis/Videos/imgs/001.jpg')
+img = vid.read_frame()
+labimg.display(img)
+img = vid.read_frame()
+img = vid.read_frame()
+img = vid.read_frame(n=0)
 
-for i, img in enumerate(readvid):
-    #labimg.basics.display(img)
+labimg.display(img)
+
     
-    num = '0'*(5-len(str(i))) + str(i)
-    labimg.basics.write_img(img, path + filename[:-4] + num + '.png')
+    #num = '0'*(5-len(str(i))) + str(i)
+    #labimg.basics.write_img(img, path + filename[:-4] + num + '.png')
     
