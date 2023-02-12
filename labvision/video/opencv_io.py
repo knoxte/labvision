@@ -25,7 +25,7 @@ class _ReadImgSeq:
     def __init__(self, file_filter : str):
         self.ext = '.'+file_filter.split('.')[1]
         
-        assert  self.ext in ['.jpg','.png','.tiff'], 'Extension not recognised'
+        assert  self.ext in ['.jpg','.png','.tiff','.JPG'], 'Extension not recognised'
 
         self.files = BatchProcess(file_filter, smart_sort=smart_number_sort)
         ret, im = self.read()
@@ -164,7 +164,7 @@ class ReadVideo:
         self.ext = os.path.splitext(self.filename)[1]
         if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm']:
             self.filetype = 'video'
-        elif self.ext in ['.jpg','.png', '.tiff']:
+        elif self.ext in ['.jpg','.png', '.tiff','.JPG']:
             self.filetype = 'img_seq'
         else:
             raise NotImplementedError('File extension is not implemented')
