@@ -6,6 +6,9 @@ from filehandling import BatchProcess, smart_number_sort
 from .. import images
 from typing import Optional, Tuple
 
+IMG_FILE_EXT = ('.png','.jpg','.tiff','.JPG','.PNG','.TIFF')
+VID_FILE_EXT = ('.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm')
+
 """type hints"""
 FrameRange = Tuple[int, Optional[int], int]
 
@@ -25,7 +28,7 @@ class _ReadImgSeq:
     def __init__(self, file_filter : str):
         self.ext = '.'+file_filter.split('.')[1]
         
-        assert  self.ext in ['.jpg','.png','.tiff','.JPG'], 'Extension not recognised'
+        assert  self.ext in IMG_FILE_EXT, 'Extension not recognised'
 
         self.files = BatchProcess(file_filter, smart_sort=smart_number_sort)
         ret, im = self.read()
@@ -37,7 +40,6 @@ class _ReadImgSeq:
     def read(self):
         """read a file"""
         filename = next(self.files)
-        print(filename)
         im = cv2.imread(filename)
         if np.size(im) == 1:
             ret = False
@@ -48,7 +50,8 @@ class _ReadImgSeq:
     def set(self, dummy, frame_num : float):
         """set the pointer to the file with specified index. This is the index in the list of files
         discovered by BatchProcess"""
-        self.files.current = int(frame_num)
+        assert frame_num in range(len(self.files.files)), 'Attempted to set frame num to impossible value'
+        self.files.current = int(frame_num)        
 
     def get(self, property):
         if property == cv2.CAP_PROP_POS_FRAMES:
@@ -162,9 +165,10 @@ class ReadVideo:
         this is used to select either video or img_seq internally
         """
         self.ext = os.path.splitext(self.filename)[1]
-        if self.ext in ['.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm']:
+
+        if self.ext in VID_FILE_EXT:
             self.filetype = 'video'
-        elif self.ext in ['.jpg','.png', '.tiff','.JPG']:
+        elif self.ext in IMG_FILE_EXT:
             self.filetype = 'img_seq'
         else:
             raise NotImplementedError('File extension is not implemented')
@@ -222,6 +226,7 @@ class ReadVideo:
         if n is None:
             return self.read_next_frame()
         else:
+            assert n in self.frame_range, 'requested frame not in frame_range'
             self.set_frame(n)
             return self.read_next_frame()
 
@@ -280,8 +285,7 @@ class ReadVideo:
                 im = self.return_func(im)
 
             return im.copy()
-        else:
-            raise Exception('Cannot read frame')
+        
 
     def _read(self):
         """private method that reads next image. By caching the previous frame
@@ -379,7 +383,6 @@ class WriteVideo:
             fps,
             (self.frame_size[1], self.frame_size[0]))
 
-        #assert self.vid.isOpened(), 'Video failed to open'
 
     def add_frame(self, im):
         """
@@ -450,7 +453,5 @@ def imgs_to_video(file_filter, videoname, sort=None):
         write_vid.add_frame(img)
     write_vid.close()
         
-
-    
 
     
