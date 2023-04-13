@@ -44,11 +44,10 @@ def mean(ims):
 
 
     
-
-def display(image, title=' ', resolution=(960, 540)):        
+Pt = tuple(x:int, y:int)
+def display(image, title=' ', resolution=(960, 540)) -> list[Pt]: 
     """Uses cv2 to display an image then wait for a button press
-    pts is either None or an integer specifying the number of point 
-    and click events you'd like to capture"""
+    list of coordinates of points clicked on the image are returned"""
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
     cv2.resizeWindow(title, *resolution)
  
