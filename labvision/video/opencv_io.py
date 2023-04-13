@@ -103,7 +103,7 @@ class ReadVideo:
     frame_num : int
         current frame pointed at in video or seq
     num_frames : int
-        number of frames in the video or seq. If a range is selected this may not be accessible.
+        number of frames in the video or seq. If a frame_range is set this shows the number of frames in actual video rather than the range. 
     width : int
         width of frame in pixels
     height : int
@@ -147,10 +147,11 @@ class ReadVideo:
         self.get_vid_props()
         self.frame_num = 0
         self.vid_position = 0
-        self.set_frame_range(frame_range)
-        self.return_func = return_function
         self.cached_frame = None
         self.cached_frame_number = None
+        self.set_frame_range(frame_range)
+        self.return_func = return_function
+        
 
     def set_frame_range(self, frame_range : FrameRange):
         """set_frame_range limits the accessible frames in the video and the 
@@ -339,8 +340,7 @@ class WriteVideo:
         OpenCV VideoWriter instance
     frame_size : tuple
         (height, width) - Same order as np.shape. This should be the input frame_size.
-        If the frame is grayscale this will be automatically converted to 3 bit depth
-        to keep opencv happy. A warning is printed to remind you.
+        If the frame is grayscale this will be automatically converted to 3 bit depth to keep opencv happy. A warning is printed to remind you.
     frame : np.ndarray
         example image to be saved
     fps : int
@@ -430,12 +430,14 @@ def video_to_imgs(videoname, image_filename_stub, ext='.png'):
     image_filename_stub :   filename stub for all the images (full path)
     ext :   type of image extension, defaults to png
     """
+    
     readvid = ReadVideo(videoname)
+    print('test')
     for i, img in enumerate(readvid):
+        
         suffix = suffix_generator(i, num_figs=len(str(readvid.num_frames)))
         images.write_img(img, image_filename_stub + suffix + ext)
-
-
+ 
 def imgs_to_video(file_filter, videoname, sort=None):
     """
     Function to assemble images into a video
@@ -454,4 +456,5 @@ def imgs_to_video(file_filter, videoname, sort=None):
     write_vid.close()
         
 
-    
+
+
