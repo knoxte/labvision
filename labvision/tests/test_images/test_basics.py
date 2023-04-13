@@ -2,7 +2,7 @@ import labvision.images as images
 import numpy as np
 import os
 
-data_dir = 'labvision/labvision/data'
+data_dir = 'labvision/data'
 
 def test_read_jpg():
     """Test that a jpeg can be read"""

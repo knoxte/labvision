@@ -10,7 +10,7 @@ import labvision.images as imgs
 import numpy as np
 import cv2
 
-data_dir = 'labvision/labvision/data'
+data_dir = 'labvision/data'
 mp4_videopath = os.path.join(data_dir, 'video/SampleVideo.mp4')
 avi_videopath = os.path.join(data_dir, 'video/SampleVideo.avi')
 mkv_videopath = os.path.join(data_dir, 'video/SampleVideo.mkv')
