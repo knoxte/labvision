@@ -14,7 +14,46 @@ __all__ = [
 ]
 
 
-def find_connected_components(thresh_img, connectivity=4, option=cv2.CV_32S):
+
+def find_circles(img: np.array, min_dist: int, p1: int, p2: int, min_rad: int, max_rad: int, dp: int=1):
+    """find_circles
+
+    Finds circles in an image using OpenCV HoughCircles
+    
+    Parameters
+    ----------
+    img : nd.array
+        _description_
+    min_dist : int
+        min distance between circle centres
+    p1 : int
+        accumulator param 1. Smaller leads to more circles
+        For details - see https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
+    p2 : int
+        accumulator param 2. Smaller gives more circles
+    min_rad : int
+        min radius of circle
+    max_rad : int
+        max radius of circle
+    dp : int, optional
+        , by default 1
+
+    Returns
+    -------
+    List of circles like [[]]
+    """
+    circles = cv2.HoughCircles(
+        img,
+        cv2.HOUGH_GRADIENT, dp,
+        min_dist,
+        param1=p1,
+        param2=p2,
+        minRadius=min_rad,
+        maxRadius=max_rad)
+    return np.squeeze(circles)
+
+
+def find_connected_components(thresh_img: np.ndarray, connectivity: int=4, option=cv2.CV_32S):
     """Find binary collections of pixels that are connected together.
 
     :param thresh_img: thresholded image
@@ -46,10 +85,13 @@ def find_connected_components(thresh_img, connectivity=4, option=cv2.CV_32S):
 
     return labels, stats, centroids
 
+def extract_biggest_object():
+    return extract_nth_biggest_object(n=1)
 
-def extract_biggest_object(img):
+def extract_nth_biggest_object(img, n=1):
     """
-    Finds the object with the most pixels in an image
+    Finds the object with the nth most pixels in an image. n=1 is the biggest
+    n=0 will extract the black object left when the other bits are removed.
 
     Parameters
     ---------
@@ -60,45 +102,52 @@ def extract_biggest_object(img):
     -------
     img: np.ndarray
     |    The returned image is binary with just the pixels of
-    |    the largest object white
+    |    the nth largest object white
 
     """
 
     output = cv2.connectedComponentsWithStats(img, 4, cv2.CV_32S)
     labels = output[1]
     stats = output[2]
-    stats = stats[1:][:]
-    index = np.argmax(stats[:, cv2.CC_STAT_AREA]) + 1
+    #stats = stats[:][:]
+    areas = stats[:,4]
+    print(areas)
+    sort_index = np.argsort(areas)
+    #index = np.argmax(stats[:, cv2.CC_STAT_AREA]) + 1
     out = np.zeros(np.shape(img))
+    print(sort_index[n])
     try:
-        out[labels == index] = 255
+        out[labels == sort_index[::-1][n]] = 255
     except:
         print(output[0])
         display(img)
     return out
 
 
-def find_circles(img, min_dist, p1, p2, min_rad, max_rad, dp=1):
-    """Finds circles in an image using OpenCV HoughCircles
-
-    :param img:
 
 
-    :return:
+
+#--------------------------------------------------------------------
+# Historical code
+#----------------------------------------------------------------------
 
 
+def find_colour(image, col, t=8, disp=False):
     """
+    LAB colorspace allows finding colours somewhat independent of
+    lighting conditions.
 
+    param
 
-    circles = cv2.HoughCircles(
-        img,
-        cv2.HOUGH_GRADIENT, dp,
-        min_dist,
-        param1=p1,
-        param2=p2,
-        minRadius=min_rad,
-        maxRadius=max_rad)
-    return np.squeeze(circles)
+    https://www.learnopencv.com/color-spaces-in-opencv-cpp-python/
+    """
+    # Swap to LAB colorspace
+    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+    b = lab[:, :, 2]
+    if col == 'Blue':
+        peak = histogram_peak(b, disp=disp)
+        blue = threshold(b, thresh=peak - t, mode=cv2.THRESH_BINARY)
+        return ~blue
 
 
 def histogram_peak(im, disp=False):
@@ -120,21 +169,3 @@ def histogram_peak(im, disp=False):
         plt.plot(bins[:-1], data)
         plt.show()
     return peak
-
-
-def find_colour(image, col, t=8, disp=False):
-    """
-    LAB colorspace allows finding colours somewhat independent of
-    lighting conditions.
-
-    param
-
-    https://www.learnopencv.com/color-spaces-in-opencv-cpp-python/
-    """
-    # Swap to LAB colorspace
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
-    b = lab[:, :, 2]
-    if col == 'Blue':
-        peak = histogram_peak(b, disp=disp)
-        blue = threshold(b, thresh=peak - t, mode=cv2.THRESH_BINARY)
-        return ~blue

@@ -2,57 +2,55 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+from labvision.custom_exceptions import NotImageError
+
 __all__ = [
     'display',
-    'plot',
     'read_img',
     'load',
     'read',
     'write_img',
     'save',
-    'write',
-    'width_and_height',
-    'dimensions',
-    'height',
-    'width',
-    'to_uint8',
-    'Displayer',
-    'mean',
-    'depth'
+    'write'
 ]
-
-
-class Displayer:
-    def __init__(self, window_name, resolution=(1280, 720)):
-        self.active = True
-        self.window_name = window_name
-        cv2.namedWindow(self.window_name, cv2.WINDOW_KEEPRATIO)
-        cv2.resizeWindow(self.window_name, *resolution)
-
-    def update_im(self, im):
-        cv2.imshow(self.window_name, im)
-        if cv2.waitKey(100) & 0xFF == ord('q'):
-            self.active = False
-            cv2.destroyAllWindows()
-
-
-def mean(ims):
-    im = np.stack(ims, axis=len(np.shape(ims[0])))
-    im = np.float32(im)
-    im = np.mean(im, axis=len(np.shape(ims[0])))
-    return np.uint8(im)
-
-
     
-Pt = tuple(x:int, y:int)
-def display(image, title=' ', resolution=(960, 540)) -> list[Pt]: 
-    """Uses cv2 to display an image then wait for a button press
-    list of coordinates of points clicked on the image are returned"""
+Pt = tuple[int, int]
+def display(image : np.ndarray, title : str=' ') -> list[Pt]: 
+    """display
+
+    Displays a single image in pop up window. You can click as many times as you want storing the (x,y) coords in a list. This is returned when the user presses a key to close the window.
+
+    Example
+    -------
+    pts=display(img)
+
+    Parameters
+    ----------
+    image : np.ndarray
+        _description_
+    title : str, optional
+        title bar of image, by default ' '
+    resolution : Pt, optional
+        window resolution, by default (960, 540)
+
+    Returns
+    -------
+    list[Pt]
+        
+    """
+    img_shape = np.shape(image)
+    if np.size(img_shape) == 2:
+        resolution =(img_shape[1],img_shape[1])
+    elif np.size(img_shape) == 3:
+        resolution = (img_shape[1],img_shape[0])
+    else:
+        raise NotImageError()
+
     cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
     cv2.resizeWindow(title, *resolution)
  
     display_points = []
-    def left_mouse_click(event, x, y, flags, param):
+    def left_mouse_click(event, x : int, y : int, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             display_points.append((x,y))        
     cv2.setMouseCallback(title,left_mouse_click)
@@ -61,17 +59,6 @@ def display(image, title=' ', resolution=(960, 540)) -> list[Pt]:
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return display_points
-
-
-def plot(im):
-    plt.figure()
-    plt.imshow(im)
-    plt.show()
-
-
-def to_uint8(im):
-    im = (im - np.min(im)) / (np.max(im) - np.min(im)) * 255
-    return np.uint8(im)
 
 
 def read_img(filepath, grayscale=False, alpha=False):
@@ -113,11 +100,15 @@ load = read_img
 read = read_img
 
 
-def write_img(img, filename):
-    """
-    Saves an image to a specified file.
+def write_img(img : np.ndarray, filename : str):
+    """write_img
 
+    Saves an image to a specified file.
     The image format is chosen based on the filename extension
+
+    Example
+    -------
+    write_img(img, filename)
 
     Parameters
     ----------
@@ -145,71 +136,4 @@ save = write_img
 write = write_img
 
 
-def width_and_height(img):
-    """
-    Returns width, height for an image
 
-    Parameters
-    ----------
-    img: Array containing an image
-
-    Returns
-    -------
-    width: int
-        Width of the image
-    height: int
-        Height of the image
-
-    Notes
-    -----
-    Width of an image is the first dimension for numpy arrays.
-    Height of an image is the first dimension for openCV
-    """
-    w = width(img)
-    h = height(img)
-    return w, h
-
-
-dimensions = width_and_height
-
-
-def width(img):
-    """
-    Returns width for img
-
-    Parameters
-    ----------
-    img: Array containing an image
-
-    Returns
-    -------
-    width: int
-        Width of the image
-
-    """
-    return int(np.shape(img)[1])
-
-
-def height(img):
-    """
-    Returns the height of an image
-
-    Parameters
-    ----------
-    img: Array containing an image
-
-    Returns
-    -------
-    height: int
-        height of the image
-
-    """
-    return int(np.shape(img)[0])
-
-
-def depth(img):
-    shp = np.shape(img)
-    if len(shp) == 2:
-        return 1
-    else:
-        return shp[2]

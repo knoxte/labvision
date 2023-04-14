@@ -54,6 +54,36 @@ def adaptive_threshold(im, block_size, constant, mode=cv2.THRESH_BINARY):
     )
     return out
 
+def distance_transform(img):
+    """
+    Calculates the distance to the closest zero pixel for each pixel.
+
+    Calculates the approximate or precise distance from every binary image
+    pixel to the nearest zero pixel. For zero image pixels, the distance will
+    obviously be zero.
+
+    Parameters
+    ----------
+    img: 8-bit image.
+
+    Returns
+    -------
+    out: Output image with calculated distances.
+        It is a 8-bit or 32-bit floating-point, single-channel image of the
+        same size as img.
+
+    References
+    ----------
+    Pedro Felzenszwalb and Daniel Huttenlocher. Distance transforms of sampled
+    functions. Technical report, Cornell University, 2004.
+    """
+    dist_transform = cv2.distanceTransform(img, cv2.DIST_L2, 5)
+    return dist_transform
+
+
+#---------------------------------------------------------
+# Not actively used or tested. kept for historical reasons #---------------------------------------------------------
+
 
 def inrange(im, bottom_tuple, top_tuple):
     return cv2.inRange(im, bottom_tuple, top_tuple)
@@ -100,28 +130,3 @@ def watershed(img, watershed_threshold=0.5, block_size=5, constant=0,
     return img
 
 
-def distance_transform(img):
-    """
-    Calculates the distance to the closest zero pixel for each pixel.
-
-    Calculates the approximate or precise distance from every binary image
-    pixel to the nearest zero pixel. For zero image pixels, the distance will
-    obviously be zero.
-
-    Parameters
-    ----------
-    img: 8-bit image.
-
-    Returns
-    -------
-    out: Output image with calculated distances.
-        It is a 8-bit or 32-bit floating-point, single-channel image of the
-        same size as img.
-
-    References
-    ----------
-    Pedro Felzenszwalb and Daniel Huttenlocher. Distance transforms of sampled
-    functions. Technical report, Cornell University, 2004.
-    """
-    dist_transform = cv2.distanceTransform(img, cv2.DIST_L2, 5)
-    return dist_transform

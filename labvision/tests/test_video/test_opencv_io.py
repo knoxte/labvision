@@ -2,24 +2,12 @@ import os
 import sys
 import shutil
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import labvision.video as video
-import labvision.images as imgs
 import numpy as np
 import cv2
 
-data_dir = 'labvision/data'
-mp4_videopath = os.path.join(data_dir, 'video/SampleVideo.mp4')
-avi_videopath = os.path.join(data_dir, 'video/SampleVideo.avi')
-mkv_videopath = os.path.join(data_dir, 'video/SampleVideo.mkv')
-png_seqpath = os.path.join(data_dir, 'pngs/SampleVideo*.png')
-jpg_seqpath = os.path.join(data_dir, 'jpgs/SampleVideo*.jpg')
-tiff_seqpath = os.path.join(data_dir, 'tiffs/SampleVideo*.tiff')
-single_img = os.path.join(data_dir, 'pngs/SampleVideo1.png')
-output_filename = os.path.join(data_dir, 'video/test.mp4')
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import labvision.video as video
+from labvision.tests import *
 
 #=================================================================================
 # ReadVideo Tests #=================================================================================
@@ -53,7 +41,7 @@ def test_read_jpg_frames():
     vid = video.ReadVideo(jpg_seqpath)
     frame = vid.read_next_frame()
     assert np.shape(frame) == (1080, 1920, 3)
-    
+  
 def test_read_tiff_frames():
     """Check working with tiffs"""
     vid = video.ReadVideo(tiff_seqpath)
@@ -88,25 +76,24 @@ def test_read_seq_props():
 def test_read_single_img():
     """Check working with single imgs"""
     vid = video.ReadVideo(single_img)
-    frame = vid.read_next_frame()
+    vid.read_next_frame()
     assert vid.num_frames == 1
 
 def test_imgs_to_video():
     """Check imgs convert to video correctly"""
-    output_filename=png_seqpath[:-5]+'.mp4'
-    video.opencv_io.imgs_to_video(png_seqpath, output_filename, sort=None)
-    assert os.path.exists(output_filename)
-    os.remove(output_filename)
+    test_filename=png_seqpath[:-5]+'.mp4'
+    video.opencv_io.imgs_to_video(png_seqpath,vid_output_filename, sort=None)
+    assert os.path.exists(vid_output_filename)
+    os.remove(vid_output_filename)
 
 def test_video_to_imgs():
     """Check imgs convert to video correctly"""
-    
-    test_dir = data_dir + '/test'
+    test_dir = DATA_DIR + '/test'
     if os.path.exists(test_dir):
         shutil.rmtree(test_dir)
-    output_filenamestub=test_dir + '/test'
+    vid_output_filenamestub=test_dir + '/test'
     os.mkdir(test_dir)
-    video.opencv_io.video_to_imgs(mp4_videopath, output_filenamestub)  
+    video.opencv_io.video_to_imgs(mp4_videopath,vid_output_filenamestub)  
     assert os.path.exists(test_dir + '/test02.png')
     shutil.rmtree(test_dir)
 
@@ -114,24 +101,27 @@ def test_video_to_imgs():
 # WriteVideo Tests #=================================================================================
 
 def test_write_video():
-    test_img = cv2.imread(single_img)
-    writevid = video.WriteVideo(output_filename, frame_size=(1080, 1920, 3))
-    writevid.add_frame(test_img)
+    """Test that WriteVideo creates a video file"""
+    writevid = video.WriteVideo(vid_output_filename, frame=rgb_img_test())
+    writevid.add_frame(rgb_img_test())
     writevid.close()
-    assert os.path.exists(output_filename)
-    os.remove(output_filename)
+    assert os.path.exists(vid_output_filename)
+    os.remove(vid_output_filename)
 
 def test_frame_wrong_shape_raises_error():
-    writevid = video.WriteVideo(output_filename, frame_size=(1080, 1920, 3))
-    test_img = np.zeros((1000, 1000, 3), dtype=np.uint8)
+    """Test that error is thrown iif a frame is added with shape that is different to frame_size used in constructor"""
+    writevid = video.WriteVideo(vid_output_filename, frame_size=(1080, 1920, 3))
+    wrong_shape_img = np.zeros((1000, 1000, 3), dtype=np.uint8)
     with pytest.raises(AssertionError):
-        writevid.add_frame(test_img)
+        writevid.add_frame(wrong_shape_img)
 
 def test_either_img_framesize_supplied_error():
+    """Test that failing to provide either frame or frame_size creates error in WriteVideo"""
     with pytest.raises(AssertionError):
-        writevid = video.WriteVideo(output_filename, frame_size=None, frame=None)
+        video.WriteVideo(vid_output_filename, frame_size=None, frame=None)
 
 def test_suffix_generator():
+    """Test that suffix_generator creates the correct suffix"""
     assert video.opencv_io.suffix_generator(5, num_figs=4) == '0005'
 
     
