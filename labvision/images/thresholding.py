@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from labvision.images.gui import ConfigGui
+
 from .colors import *
 from .basics import *
 
@@ -13,15 +15,24 @@ __all__ = [
 ]
 
 
-def threshold(im, value=None, mode=cv2.THRESH_BINARY):
+def threshold(im, value=None, mode=cv2.THRESH_BINARY, configure=False):
     """
     Thresholds an image
 
     Pixels below thresh set to black, pixels above set to white
     """
-    if value is None:
-        mode = mode + cv2.THRESH_OTSU
-    return cv2.threshold(im, value, 255, mode)[1]
+    
+    if configure:
+        print('test')
+        param_dict = {'value':[value,0,255,1],'mode':[mode,0,1,1]}
+        gui = ConfigGui(im, threshold, param_dict)
+        thresh_img = threshold(im, **gui.reduced_dict)
+        gui.app.quit()
+    else:
+        if value is None:
+            mode = mode + cv2.THRESH_OTSU
+        thresh_img = cv2.threshold(im, value, 255, mode)[1]
+    return thresh_img
 
 
 def adaptive_threshold(im, block_size, constant, mode=cv2.THRESH_BINARY):

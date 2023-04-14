@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from .basics import *
 from .thresholding import *
 
+from labvision.images.gui import ConfigGui
+
 __all__ = [
     "find_connected_components",
     "find_circles",
@@ -15,7 +17,7 @@ __all__ = [
 
 
 
-def find_circles(img: np.array, min_dist: int, p1: int, p2: int, min_rad: int, max_rad: int, dp: int=1):
+def find_circles(img: np.array, min_dist: int, p1: int, p2: int, min_rad: int, max_rad: int, dp: int=1, configure=False):
     """find_circles
 
     Finds circles in an image using OpenCV HoughCircles
@@ -42,14 +44,25 @@ def find_circles(img: np.array, min_dist: int, p1: int, p2: int, min_rad: int, m
     -------
     List of circles like [[]]
     """
-    circles = cv2.HoughCircles(
-        img,
-        cv2.HOUGH_GRADIENT, dp,
-        min_dist,
-        param1=p1,
-        param2=p2,
-        minRadius=min_rad,
-        maxRadius=max_rad)
+    if configure:
+        param_dict = {
+            'min_dist': [min_dist, 3, min_dist*10, 2],
+            'p1': [p1, 1, 255, 1],
+            'p2': [p2, 1, 255, 1],
+            'min_rad': [min_rad, 3, min_rad*10, 1],
+            'max_rad': [max_rad, 3, max_rad*10, 1],
+            'dp':[dp,1,dp*10,1]
+        }
+        circles = ConfigGui(img, find_circles, **param_dict)
+    else:
+        circles = cv2.HoughCircles(
+            img,
+            cv2.HOUGH_GRADIENT, dp,
+            min_dist,
+            param1=p1,
+            param2=p2,
+            minRadius=min_rad,
+            maxRadius=max_rad)
     return np.squeeze(circles)
 
 

@@ -1,10 +1,9 @@
-from cv2 import threshold
-import numpy as np
-from labvision.tests import binary_img_test, grayscale_img_test, rgb_img_test, grayscale_img_test2, contour_test, contour_test2
-from labvision.tests.test_images.test_morphological import test_dilate, test_erode, test_closing, test_opening
-from labvision.tests.test_images.test_feature_detection import test_extract_nth_biggest_object, test_find_circles, test_find_connected_components
 
-filename = 'C:\\Users\\mikei\\OneDrive - The University of Nottingham\\Documents\\Programming\\labvision\\labvision\\data\\jpgs\\SampleImage.jpg'
+from ast import Param
+from labvision.images.gui import ConfigGui
+from labvision.tests import grayscale_img_test
+from labvision.images.thresholding import threshold
+from labvision.images.basics import display
 
-
-test_extract_nth_biggest_object()
+img = threshold(grayscale_img_test(), value=100, configure=True)
+display(img)
