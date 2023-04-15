@@ -23,7 +23,6 @@ def threshold(im, value=None, mode=cv2.THRESH_BINARY, configure=False):
     """
     
     if configure:
-        print('test')
         param_dict = {'value':[value,0,255,1],'mode':[mode,0,1,1]}
         gui = ConfigGui(im, threshold, param_dict)
         thresh_img = threshold(im, **gui.reduced_dict)
@@ -35,7 +34,7 @@ def threshold(im, value=None, mode=cv2.THRESH_BINARY, configure=False):
     return thresh_img
 
 
-def adaptive_threshold(im, block_size, constant, mode=cv2.THRESH_BINARY):
+def adaptive_threshold(im, block_size=10, constant=5, mode=cv2.THRESH_BINARY, configure=False):
     """
     Performs an adaptive threshold on an image
 
@@ -55,14 +54,20 @@ def adaptive_threshold(im, block_size, constant, mode=cv2.THRESH_BINARY):
 
     constant: subtracted from the weighted sum
     """
-    out = cv2.adaptiveThreshold(
-        im,
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        mode,
-        block_size,
-        constant
-    )
+    if configure:
+        param_dict = {'block_size':[block_size,1,block_size*25,2],'constant':[constant,1,constant*25,2],'mode':[mode,0,1,1]}
+        gui = ConfigGui(im, adaptive_threshold, param_dict)
+        out = adaptive_threshold(im, **gui.reduced_dict)
+        gui.app.quit()
+    else:
+        out = cv2.adaptiveThreshold(
+            im,
+            255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            mode,
+            block_size,
+            constant
+        )
     return out
 
 def distance_transform(img):

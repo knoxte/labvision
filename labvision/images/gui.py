@@ -37,7 +37,7 @@ class ConfigGui:
         """
         self.im=img
         self.im0 = img.copy()
-        self.param_dict = param_dict
+        self.param_dict = {k:check_init_param_val(v) for k,v in param_dict.items()}
         self.func = func
         self.init_ui()
     
@@ -98,14 +98,10 @@ class ConfigGui:
                 self.window.close()
                 
 
-
-def odd(a):
-    assert type(a) == int, 'Only ints can be odd'
-    return a % 2 == 1
-
-def even(a):
-    assert type(a) == int, 'Only ints can be even'
-    return a % 2 == 0
-
-
-
+def check_init_param_val(param_list: list[int]):
+    if param_list[3]%2==0:
+        #If the increment value is 2 implies only odd values allowed
+        if param_list[0]%2==0:
+            #If initial value is even make it odd
+            param_list[0] += 1
+    return param_list

@@ -50,7 +50,9 @@ def gray_to_bgr(im):
 
 
 
-"""Never use any of this but leave for legacy code"""
+#--------------------------------------------------
+# Never use any of this but leave for legacy code
+#--------------------------------------------------
 
 def bgr_to_hsv(im):
     return cv2.cvtColor(im, cv2.COLOR_BGR2HSV)

@@ -6,6 +6,8 @@ from .basics import *
 from .thresholding import *
 
 from labvision.images.gui import ConfigGui
+from labvision.images.draw import draw_circle, gray_to_bgr, bgr_to_gray
+from labvision.images.geometric import get_shape
 
 __all__ = [
     "find_connected_components",
@@ -17,10 +19,10 @@ __all__ = [
 
 
 
-def find_circles(img: np.array, min_dist: int, p1: int, p2: int, min_rad: int, max_rad: int, dp: int=1, configure=False):
+def find_circles(img: np.ndarray, min_dist: int=5, p1: int=70, p2: int=10, min_rad: int=10, max_rad: int=50, dp: int=1, configure=False):
     """find_circles
 
-    Finds circles in an image using OpenCV HoughCircles
+    Finds circles in an image using OpenCV HoughCircles. 
     
     Parameters
     ----------
@@ -44,21 +46,35 @@ def find_circles(img: np.array, min_dist: int, p1: int, p2: int, min_rad: int, m
     -------
     List of circles like [[]]
     """
+    if get_shape(img)[2] == 3:
+        #Image is converted to grayscale.
+        img = bgr_to_gray(img)
+
     if configure:
         param_dict = {
-            'min_dist': [min_dist, 3, min_dist*10, 2],
+            'min_dist': [min_dist, 3, min_dist*25, 2],
             'p1': [p1, 1, 255, 1],
             'p2': [p2, 1, 255, 1],
-            'min_rad': [min_rad, 3, min_rad*10, 1],
-            'max_rad': [max_rad, 3, max_rad*10, 1],
-            'dp':[dp,1,dp*10,1]
+            'min_rad': [min_rad, 3, min_rad*25, 1],
+            'max_rad': [max_rad, 3, max_rad*25, 1],
+            'dp':[dp,1,dp*25,1]
         }
-        circles = ConfigGui(img, find_circles, **param_dict)
+
+        def process_view(img: np.ndarray, min_dist: int=5, p1: int=70, p2: int=10, min_rad: int=10, max_rad: int=50, dp: int=1,):
+            circles = find_circles(img, min_dist, p1, p2, min_rad, max_rad, dp)
+            img = gray_to_bgr(img)
+            for circle in circles:
+                img = draw_circle(img, circle[0], circle[1], circle[2])
+            return img
+        
+        gui = ConfigGui(img, process_view, param_dict)
+        circles = find_circles(img, **gui.reduced_dict)
+        gui.app.quit()
     else:
         circles = cv2.HoughCircles(
             img,
-            cv2.HOUGH_GRADIENT, dp,
-            min_dist,
+            cv2.HOUGH_GRADIENT, dp=dp,
+            minDist=min_dist,
             param1=p1,
             param2=p2,
             minRadius=min_rad,
