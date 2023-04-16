@@ -3,7 +3,7 @@ import os
 import pytest
 
 from labvision.images.basics import write_img, read_img
-from labvision.tests import DATA_DIR
+from tests import DATA_DIR
 
 
 def test_read_jpg():

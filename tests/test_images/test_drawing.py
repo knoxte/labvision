@@ -1,7 +1,7 @@
 
 from labvision.images.colors import WHITE
 from labvision.images.draw import draw_circle, draw_contours, draw_polygon, draw_delaunay_tess, draw_voronoi_cells
-from labvision.tests import rgb_img_test, contour_test, contour_test2
+from tests import rgb_img_test, contour_test, contour_test2
 
 import numpy as np
 from labvision.images.basics import display

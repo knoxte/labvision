@@ -6,7 +6,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import labvision.video as video
-from labvision.tests import *
+from tests import mp4_videopath, avi_videopath, mkv_videopath, png_seqpath, jpg_seqpath, tiff_seqpath, single_img, vid_output_filename, DATA_DIR, rgb_img_test
 
 #=================================================================================
 # ReadVideo Tests 
@@ -26,7 +26,7 @@ def test_read_video_frame_avi():
     
 def test_read_video_frame_mkv():
     """Check working with mkv"""
-    vid = video.ReadVideo(png_seqpath)
+    vid = video.ReadVideo(mkv_videopath)
     frame = vid.read_next_frame()
     assert np.shape(frame) == (1080, 1920, 3)
 

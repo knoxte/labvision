@@ -5,7 +5,7 @@ import cv2
 from labvision.images.basics import display
 from labvision.images.geometric import get_shape, resize, rotate, hstack, vstack, to_uint8
 
-from labvision.tests import *
+from tests import rgb_img_test, grayscale_img_test
 
 
 

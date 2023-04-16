@@ -1,4 +1,4 @@
-from labvision.tests import binary_single_circle
+from tests import binary_single_circle
 from labvision.images.morphological import dilate, erode, closing, opening
 import numpy as np
 from labvision.images.basics import display

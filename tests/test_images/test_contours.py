@@ -1,5 +1,5 @@
 from labvision.images.contours import center_of_mass, contour_to_xy, cut_out_object, find_contours, contour_props, bounding_rectangle, rotated_bounding_rectangle, sort_contours
-from labvision.tests import binary_img_test, contour_test, contour_test2, grayscale_img_test2
+from tests import binary_img_test, contour_test, contour_test2, grayscale_img_test2
 import numpy as np
 
 

@@ -1,6 +1,6 @@
 from labvision.images.draw import draw_circle
 from labvision.images.feature_detection import find_circles, find_connected_components
-from labvision.tests import binary_single_circle, grayscale_img_test2, rgb_img_test2
+from tests import binary_single_circle, grayscale_img_test2, rgb_img_test2
 from labvision.images.feature_detection import extract_nth_biggest_object
 import numpy as np
 

@@ -1,4 +1,4 @@
-from labvision.tests import binary_single_circle, grayscale_img_test
+from tests import binary_single_circle, grayscale_img_test
 from labvision.images.thresholding import adaptive_threshold, threshold, distance_transform
 import numpy as np
 import cv2
