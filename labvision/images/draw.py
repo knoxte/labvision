@@ -16,8 +16,6 @@ __all__ = [
     "draw_contours"
 ]
 
-
-
 def draw_circle(im, cx, cy, rad, color=YELLOW, thickness=2):
     """Draws single Circle on an image
 
@@ -91,7 +89,6 @@ def draw_contours(im, contours, color=RED, thickness=1):
         for i, contour in enumerate(contours):
             im = cv2.drawContours(im, contour, -1, color[i], thickness)
     return im
-
 
 def draw_delaunay_tess(img, points, color=RED, thickness=1):
     """

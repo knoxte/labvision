@@ -49,22 +49,3 @@ def gray_to_bgr(im):
     return cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
 
 
-
-#--------------------------------------------------
-# Never use any of this but leave for legacy code
-#--------------------------------------------------
-
-def bgr_to_hsv(im):
-    return cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-
-
-def bgr_to_lab(im):
-    return cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
-
-
-def hsv_to_bgr(im):
-    return cv2.cvtColor(im, cv2.COLOR_HSV2BGR)
-
-
-def lab_to_bgr(im):
-    return cv2.cvtColor(im, cv2.COLOR_LAB2BGR)
