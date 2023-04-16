@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from labvision.images.gui import ConfigGui
+from qtwidgets.config import ConfigGui
 
 from .colors import *
 from .basics import *

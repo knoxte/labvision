@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 from scipy import optimize as op
 from math import pi, cos, sin
-from .basics import *
-from .geometric import get_shape
+
+from labvision.images.geometric import get_shape
 
 __all__ = [
     "find_contours",
@@ -99,7 +99,6 @@ def cut_out_object(im, contour, buffer=3, setsurroundblack=False):
     """
     Cuts out a horizontal box around a contour.
     """
-    colordepth = get_shape(im)[2]
     x, y, w, h = cv2.boundingRect(contour)
 
     # Add buffer zone round img

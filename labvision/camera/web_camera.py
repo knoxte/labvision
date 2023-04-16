@@ -1,11 +1,9 @@
 from .camera_config import *
 from .camera import CameraBase
-from ..images import Displayer, display, save
-import datetime
+from ..images import save
 import cv2
 import sys
 import os
-
 
 
 class WebCamera(CameraBase):
@@ -37,12 +35,12 @@ class WebCamera(CameraBase):
 
 
     '''
-    def __init__(self, cam_num=None, cam_type=LOGITECH_HD_1080P, frame_size=None, fps=None, ):
 
+    def __init__(self, cam_num=None, cam_type=LOGITECH_HD_1080P, frame_size=None, fps=None, ):
         if cam_num is None:
             cam_num = guess_camera_number()
 
-        self.cam = cv2.VideoCapture(cam_num)
+        self.cam = cv2.VideoCapture(cam_num, apiPreference=cv2.CAP_DSHOW)#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
         self.get = self.cam.get
         super(Camera, self).__init__(cam_type)
@@ -73,7 +71,6 @@ class WebCamera(CameraBase):
 
     def get_frame(self):
         """Get a frame from the camera and return"""
-
         ret, frame = self.cam.read()
         return frame
 
@@ -155,20 +152,23 @@ class WebCamera(CameraBase):
         with open(filename, 'r') as f:
             settings = f.read().splitlines()
         self.brightness, self.contrast, self.gain, \
-        self.saturation, self.hue, self.exposure = settings
+            self.saturation, self.hue, self.exposure = settings
         self.set_property('brightness', self.brightness)
         self.set_property('contrast', self.contrast)
         self.set_property('gain', self.gain)
         self.set_property('hue', self.hue)
         self.set_property('exposure', self.exposure)
 
+
 Camera = WebCamera
+
 
 def guess_camera_number():
     """Function to find camera number assigned to webcam by computer"""
 
     try:
-        assert ('linux' in sys.platform), "guess_camera_number only implemented for linux"
+        assert (
+            'linux' in sys.platform), "guess_camera_number only implemented for linux"
         items = os.listdir('/dev/')
         newlist = []
         for names in items:

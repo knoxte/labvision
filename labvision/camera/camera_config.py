@@ -1,3 +1,5 @@
+
+
 '''
 Web camera settings
 All settings are accessible via self.cam_type in CameraBase class

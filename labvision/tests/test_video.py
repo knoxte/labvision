@@ -3,14 +3,14 @@ import sys
 import shutil
 import pytest
 import numpy as np
-import cv2
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import labvision.video as video
 from labvision.tests import *
 
 #=================================================================================
-# ReadVideo Tests #=================================================================================
+# ReadVideo Tests 
+#=================================================================================
 
 def test_read_video_frame_mp4():
     """Check working with mp4"""
@@ -81,8 +81,7 @@ def test_read_single_img():
 
 def test_imgs_to_video():
     """Check imgs convert to video correctly"""
-    test_filename=png_seqpath[:-5]+'.mp4'
-    video.opencv_io.imgs_to_video(png_seqpath,vid_output_filename, sort=None)
+    video.imgs_to_video(png_seqpath,vid_output_filename, sort=None)
     assert os.path.exists(vid_output_filename)
     os.remove(vid_output_filename)
 
@@ -93,7 +92,7 @@ def test_video_to_imgs():
         shutil.rmtree(test_dir)
     vid_output_filenamestub=test_dir + '/test'
     os.mkdir(test_dir)
-    video.opencv_io.video_to_imgs(mp4_videopath,vid_output_filenamestub)  
+    video.video_to_imgs(mp4_videopath,vid_output_filenamestub)  
     assert os.path.exists(test_dir + '/test02.png')
     shutil.rmtree(test_dir)
 
@@ -122,7 +121,7 @@ def test_either_img_framesize_supplied_error():
 
 def test_suffix_generator():
     """Test that suffix_generator creates the correct suffix"""
-    assert video.opencv_io.suffix_generator(5, num_figs=4) == '0005'
+    assert video.suffix_generator(5, num_figs=4) == '0005'
 
     
 

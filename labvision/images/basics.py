@@ -1,11 +1,14 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+from qtwidgets.config import get_monitor_size
+from labvision.images.geometric import get_shape
 
 from labvision.custom_exceptions import NotImageError
 
 __all__ = [
     'display',
+    'Displayer',
     'read_img',
     'load',
     'read',
@@ -13,9 +16,34 @@ __all__ = [
     'save',
     'write'
 ]
+
+def setupWindow(image,title=''):
+    img_shape = get_shape(image)
+    if img_shape[2] == 0:
+        resolution =(img_shape[1],img_shape[1])
+    elif img_shape[2] == 3:
+        resolution = (img_shape[1],img_shape[0])
+    else:
+        raise NotImageError()
+
+    w,h=get_monitor_size()
     
+    w_scale = 0.75*w / img_shape[1]
+    h_scale = 0.75*h / img_shape[0]
+
+    if w_scale >= h_scale:
+        scale = w_scale
+    else:
+        scale = h_scale
+       
+
+    cv2.namedWindow(title, cv2.WINDOW_NORMAL)#, cv2.WINDOW_KEEPRATIO)
+    cv2.resizeWindow(title, int(scale*img_shape[1]), int(scale*img_shape[0]))
+    cv2.moveWindow(title, int(0.125*w), int(0.075*h))
+    
+
 Pt = tuple[int, int]
-def display(image : np.ndarray, title : str=' ') -> list[Pt]: 
+def display(image : np.ndarray, title : str=' ', padding: int=100) -> list[Pt]: 
     """display
 
     Displays a single image in pop up window. You can click as many times as you want storing the (x,y) coords in a list. This is returned when the user presses a key to close the window.
@@ -38,17 +66,8 @@ def display(image : np.ndarray, title : str=' ') -> list[Pt]:
     list[Pt]
         
     """
-    img_shape = np.shape(image)
-    if np.size(img_shape) == 2:
-        resolution =(img_shape[1],img_shape[1])
-    elif np.size(img_shape) == 3:
-        resolution = (img_shape[1],img_shape[0])
-    else:
-        raise NotImageError()
+    setupWindow(image, title=title)    
 
-    cv2.namedWindow(title, cv2.WINDOW_KEEPRATIO)
-    cv2.resizeWindow(title, *resolution)
- 
     display_points = []
     def left_mouse_click(event, x : int, y : int, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -59,6 +78,28 @@ def display(image : np.ndarray, title : str=' ') -> list[Pt]:
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     return display_points
+
+class Displayer:
+    
+    def __init__(self, img: np.ndarray, title: str=''):
+        """A OpenCV window where the image can be updated.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            initial image to initialise with
+        title : str, optional
+            name of the window.
+        """
+        self.active = True
+        self.window_name = title
+        setupWindow(img, title=title)
+
+    def update_im(self, img):
+        cv2.imshow(self.window_name, img)
+        if cv2.waitKey(100) & 0xFF == ord('q'):
+            self.active = False
+            cv2.destroyAllWindows()
 
 
 def read_img(filepath, grayscale=False, alpha=False):
