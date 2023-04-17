@@ -227,7 +227,8 @@ class ReadVideo:
         if n is None:
             return self.read_next_frame()
         else:
-            assert n in self.frame_range, 'requested frame not in frame_range'
+            print(self.frame_range)
+            #assert n in self.frame_range, 'requested frame not in frame_range'
             self.set_frame(n)
             return self.read_next_frame()
 
