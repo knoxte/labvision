@@ -1,5 +1,3 @@
-from labvision.camera import WebCamera
-from labvision.images.basics import display
+from tests.test_video import test_read_frame_n
 
-cam = WebCamera()
-display(cam.get_frame())
+test_read_frame_n()

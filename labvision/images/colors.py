@@ -16,10 +16,6 @@ __all__ = [
     'PURPLE',
     'GREEN',
     'MAROON',
-    'bgr_to_hsv',
-    'bgr_to_lab',
-    'hsv_to_bgr',
-    'lab_to_bgr',
     'bgr_to_gray',
     'gray_to_bgr',
 ]

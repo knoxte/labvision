@@ -3,7 +3,7 @@ import numpy as np
 
 from qtwidgets.config import ConfigGui
 
-from .colors import *
+from .colors import bgr_to_gray, gray_to_bgr
 from .basics import *
 
 __all__ = [
