@@ -1,3 +1,4 @@
+from types import NoneType
 from ..images import save
 import cv2
 import sys
@@ -45,11 +46,14 @@ class Camera:
         self.set = self.cam.set
         self.get = self.cam.get
 
-        assert self.cam.isOpened(), 'Camera not running'
+        if not self.cam.isOpened():
+            raise CamReadError(self.cam, None)
 
     def get_frame(self):
         """Get a frame from the camera and return"""
         ret, frame = self.cam.read()
+        if not ret:
+            raise CamReadError(cam, frame)
         return frame
 
     def close(self):
@@ -108,7 +112,6 @@ class Camera:
 
     def save_settings(self, filename):
         """Save current settings to a file"""
-
         self.get_props()
         settings = (
             self.brightness,
@@ -164,15 +167,15 @@ def guess_camera_number():
 # Exceptions
 #--------------------------------------------------------------------------------------------------------
 
-class CamFrameShapeError(Exception):
-    def __init__(self):
-        print('Frame shape not possible')
+class CamReadError(Exception):
+    def __init__(self, cam, frame_size):
+        if not cam.isOpened():
+            print('Camera instance not open')
+        if type(frame_size) is NoneType:
+            print('No frame returned')
 
 class CamPropsError(Exception):
     def __init__(self, property_name):
         assert property_name in self.properties.keys(), 'property name does not exist'
         print('Error setting camera property')
 
-class CamTimeOutError(Exception):
-    def __init__(self):
-        pass
