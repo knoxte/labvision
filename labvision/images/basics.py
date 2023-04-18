@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from qtwidgets.config import get_monitor_size
 from labvision.images.geometric import get_shape
+import datetime
 
 from labvision.custom_exceptions import NotImageError
 
@@ -141,7 +142,7 @@ load = read_img
 read = read_img
 
 
-def write_img(img : np.ndarray, filename : str):
+def write_img(img : np.ndarray, filename : str, addtimestamp=False):
     """write_img
 
     Saves an image to a specified file.
@@ -168,6 +169,11 @@ def write_img(img : np.ndarray, filename : str):
     fully opaque pixels should have alpha set to 255
 
     """
+    if addtimestamp:
+        timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        _, ext = os.splitext(filename)
+        filename = filename[:-len(ext)] + timestamp + ext
+
     ret = cv2.imwrite(filename, img)
     if not ret:
         raise Exception('Could not write image')

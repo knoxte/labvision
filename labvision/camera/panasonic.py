@@ -8,6 +8,7 @@ import time
 import pexpect
 import re
 import datetime
+from typing import List, Dict, Tuple, Union, Optional
 
 time_sleep = 1
 
@@ -21,7 +22,7 @@ class Panasonic:
     something to do with things holding onto usb resources.
     """
 
-    def __init__(self, movie_mode=True,folder: str=None):
+    def __init__(self, movie_mode: bool = True,folder: Optional[str] = None):
         """Initialise Camera object
 
         Parameters
@@ -45,14 +46,14 @@ class Panasonic:
                 self.folder = '~/Pictures/'
             self._pic_initialise()
     
-    def _shell_cmd(self, command='capture-image', time_sleep=1):
+    def _shell_cmd(self, command: str ='capture-image', time_sleep: int = 1):
         """Class method to send command to GPhoto2 Shell"""
         self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         self.gphoto2_shell.sendline(command)
         time.sleep(time_sleep)
         self.gphoto2_shell.close()
     
-    def _shell_cmd_reply(self, command='capture-image', expect_reply=' on the camera', time_sleep=1):
+    def _shell_cmd_reply(self, command : str = 'capture-image', expect_reply : str =' on the camera', time_sleep=1):
         self.gphoto2_shell = pexpect.spawn('gphoto2 --shell')
         self.gphoto2_shell.sendline(command)
         self.gphoto2_shell.expect(expect_reply)
@@ -77,7 +78,7 @@ class Panasonic:
 
     def start_movie(self, duration=None):
         try:
-            self._shell_cmd('capture-image', time_sleep=duration)
+            self._shell_cmd('capture-image', time_sleep = duration)
         except:
             self.gphoto2_shell.close()
             self.start_movie(duration=duration)
@@ -107,7 +108,7 @@ class Panasonic:
         im = cv2.imread(im_filename)
         return im
 
-    def list_files(self, print_list=True):
+    def list_files(self, print_list : bool = True):
         """Obtain a list of all files currently on the camera"""
         index = self._shell_cmd_reply(command='ls ' + self.file_location, expect_reply=['P10.+JPG  ', 'P10.+MP4  ', pexpect.TIMEOUT])
 
@@ -122,7 +123,7 @@ class Panasonic:
                 print(file_list)
         return file_list
 
-    def delete_file_from_camera(self, file=None):
+    def delete_file_from_camera(self, file : Optional[str] = None):
         """Delete file from camera. If None deletes the last image."""
         if file is None:
             file = self.cam_filename
@@ -130,14 +131,14 @@ class Panasonic:
         self._shell_cmd_reply(command='delete ' + self.cam_location + file, expect_reply=' ')
     
 
-    def delete_multiple_files_from_camera(self, file_list='All'):
+    def delete_multiple_files_from_camera(self, file_list : str = 'All'):
         """Delete some or all of the photos on the camera"""
         if file_list == 'All':
             file_list = self.list_files(print_list=False)
         for file in file_list:
             self.delete_file_from_camera(file=file)
 
-    def save_file_onto_computer(self, cam_filename=None):
+    def save_file_onto_computer(self, cam_filename: Optional[str] = None):
         """Transfer a file from camera to the folder on the computer"""
         if cam_filename is None:
             cam_filename = self.cam_filename
@@ -147,10 +148,13 @@ class Panasonic:
         os.system('mv ' + self.folder + saved_filename + ' ' + cam_filename)
         return saved_filename
 
-    def save_multiple_files_onto_computer(self, file_list='all'):
+    def save_multiple_files_onto_computer(self, file_list : str | List = 'all'):
         """Transfer some or all files on camera to computer"""
         if file_list == 'all':
             cam_file_list = self.list_files(print_list=False)
+        else:
+            cam_file_list = file_list
+            
         for cam_file in cam_file_list:
             self.save_file_onto_computer(cam_filename=cam_file)
 

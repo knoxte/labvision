@@ -5,6 +5,7 @@ from slicerator import Slicerator
 from filehandling import BatchProcess, smart_number_sort
 from labvision import images
 from typing import Optional, Tuple
+import datetime
 
 IMG_FILE_EXT = ('.png', '.jpg', '.tiff', '.JPG', '.PNG', '.TIFF')
 VID_FILE_EXT = ('.MP4', '.mp4', '.m4v', '.avi', '.mkv', '.webm')
@@ -357,7 +358,7 @@ class WriteVideo:
 
     """
 
-    def __init__(self, filename, frame_size=None, frame=None, fps=50.0, codec='XVID'):
+    def __init__(self, filename, frame_size=None, frame=None, fps=50.0, codec='XVID', addtimestamp=False):
         self.filename = filename
 
         fourcc = cv2.VideoWriter_fourcc(*list(codec))
@@ -377,6 +378,11 @@ class WriteVideo:
 
         if frame is None:
             self.frame_size = frame_size
+
+        if addtimestamp:
+            timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+            _, ext = os.splitext(filename)
+            filename = filename[:-len(ext)] + timestamp + ext
 
         self.vid = cv2.VideoWriter(
             filename,
