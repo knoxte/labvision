@@ -22,18 +22,21 @@ class CameraType(Enum):
 
     PANASONICHCX1000 = {
         'apipreference': cv2.CAP_MSMF,
+        'name': 'PanasonicHCX1000',
         'res': (1920, 1080, 3),
         'fps': ((60.0),)
     }
 
     PANASONICG9 = {
         'apipreference': cv2.CAP_MSMF,
+        'name': 'PanasonicG9',
         'res': ((1920, 1080, 3), (640, 480, 3), (1280, 720, 3), (480, 360, 3)),
         'fps': ((60.0),)
     }
 
     PHILIPS3 = {
         'apipreference': cv2.CAP_DSHOW,
+        'name': 'Philips3',
         'res': ((640, 480, 3), (1280, 1080, 3)),
         'fps': ((20.0),)
     }

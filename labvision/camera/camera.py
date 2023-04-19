@@ -135,25 +135,37 @@ class Camera:
 
 WebCamera = Camera
 
-def get_cameras_windows(camera : CameraType):
+def get_camera_index_on_windows():
+    """Scan a windows computer for any attached cameras which match CameraType's
+    declarations. Assumes you only have one of each type of camera on your system.
+    Builds a list of all cameras in order specified by system. Assumes you don't have
+    cameras that are unlisted in CameraType plugged in.
+    """
     wmi = win32com.client.GetObject("winmgmts:")
+    cam_names = [camera.value['name'] for _, camera in CameraType.__members__.items()]
+    camera_types = [camObject for camObject, _ in CameraType.__members__.items()]
+
+    cam_objs = []
+
     for usb in wmi.InstancesOf("Win32_USBHub"):
-        if usb.Name == CameraType.LOGITECH_HD_1080P.value['name']:
-            print('Found Logitech')
+        if usb.Name in cam_names:
+            cam_objs.append(camera_types[cam_names.index(usb.name)])
+    
+    print(cam_objs)
+    
 
 
-def guess_camera_number():
+def guess_camera_number_linux():
     """Function to find camera number assigned to cam by computer"""
 
     try:
-        assert (
-            'linux' in sys.platform), "guess_camera_number only implemented for linux"
-        items = os.listdir('/dev/')
-        newlist = []
-        for names in items:
-            if names.startswith("video"):
-                newlist.append(names)
-        cam_num = int(newlist[0][5:])
+        if 'linux' in sys.platform:
+            items = os.listdir('/dev/')
+            newlist = []
+            for names in items:
+                if names.startswith("video"):
+                    newlist.append(names)
+            cam_num = int(newlist[0][5:])
     except AssertionError as error:
         print(error)
         print("Camera number set to 0")
