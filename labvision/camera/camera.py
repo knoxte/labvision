@@ -6,7 +6,7 @@ import os
 
 import datetime
 
-from camera_config import CameraType, CameraProperty
+from .camera_config import CameraType, CameraProperty
 from typing import Optional, Tuple
 
 
@@ -38,7 +38,7 @@ class Camera:
 
     '''
 
-    def __init__(self, cam_num=None, cam_type : CameraType = CameraType('LOGITECH_HD_1080P'), frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
+    def __init__(self, cam_num=None, cam_type : CameraType = CameraType.LOGITECH_HD_1080P, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
         if cam_num is None:
             cam_num = guess_camera_number()
 
@@ -60,55 +60,40 @@ class Camera:
         """Release the OpenCV camera instance"""
         self.cam.release()
 
-    def get_property(self, property: str):
-        try:
-            return self.get(CameraProperty(property))
-        except:
-            raise CamPropsError(property)
+    def get_property(self, property : CameraProperty=CameraProperty.WIDTH):
+        if property in CameraProperty:
+            setattr(self, property.name.lower(),self.get(property.value))
+            return getattr(self, property.name.lower())
+        else:
+            raise CamPropsError(property)      
 
-    
-    def set_property(self, property: str = 'width', value=None):
-        try:
-            self.set(CameraProperty(property), value)
-        except:
+    def set_property(self, property: CameraProperty = CameraProperty.WIDTH, value=None):
+        if property in CameraProperty:
+            setattr(self, property.name.lower(),self.get(property.value))
+        else:
             raise CamPropsError(property)      
 
     def get_props(self, show=False):
         """Retrieve a complete list of camera property values.
         Set show=True to print to the terminal"""
-
-        self.width = self.get(CameraProperty('width'))
-        self.height = self.get(CameraProperty('height'))
-        self.fps = self.get(CameraProperty('fps'))
-        self.format = self.get(CameraProperty('format'))
-        self.mode = self.get(CameraProperty('mode'))
-        self.saturation = self.get(CameraProperty('saturation'))
-        self.gain = self.get(CameraProperty('gain'))
-        self.hue = self.get(CameraProperty('hue'))
-        self.contrast = self.get(CameraProperty('contrast'))
-        self.brightness = self.get(CameraProperty('brightness'))
-        self.exposure = self.get(CameraProperty('exposure'))
-        self.auto_exposure = self.get(CameraProperty('auto_exposure'))
+        properties = {}
+        for property in CameraProperty:
+            cam_value = self.get(property.value)
+            setattr(self, property.name.lower(), cam_value)
+            properties[property.name.lower()]= cam_value
 
         if show:
             print('----------------------------')
             print('List of Video Properties')
             print('----------------------------')
-            print('width : ', self.width)
-            print('height : ', self.height)
-            print('fps : ', self.fps)
-            print('format : ', self.format)
-            print('mode : ', self.mode)
-            print('brightness : ', self.brightness)
-            print('contrast : ', self.contrast)
-            print('hue : ', self.hue)
-            print('saturation : ', self.saturation)
-            print('gain : ', self.gain)
-            print('exposure :', self.exposure)
-            print('auto_exposure:', self.auto_exposure)
+            for property in CameraProperty:
+                print(property.name.lower() + ' : {}'.format(getattr(self, property.name.lower())))
             print('')
             print('unsupported features return 0')
             print('-----------------------------')
+        
+        return properties
+        
 
     def save_settings(self, filename):
         """Save current settings to a file"""
@@ -132,14 +117,17 @@ class Camera:
             settings = f.read().splitlines()
         self.brightness, self.contrast, self.gain, \
             self.saturation, self.hue, self.exposure = settings
-        self.set(CameraProperty('brightness'), self.brightness)
-        self.set(CameraProperty('contrast'), self.contrast)
-        self.set(CameraProperty('gain'), self.gain)
-        self.set(CameraProperty('hue'), self.hue)
-        self.set(CameraProperty('exposure'), self.exposure)
+        self.set(CameraProperty.BRIGHTNESS, self.brightness)
+        self.set(CameraProperty.CONTRAST, self.contrast)
+        self.set(CameraProperty.GAIN, self.gain)
+        self.set(CameraProperty.HUE, self.hue)
+        self.set(CameraProperty.EXPOSURE, self.exposure)
 
-    def _timestamp(self):
-        return datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.close()
 
 WebCamera = Camera
 
@@ -169,6 +157,7 @@ def guess_camera_number():
 
 class CamReadError(Exception):
     def __init__(self, cam, frame_size):
+        print('Frame size: {}'.format(frame_size))
         if not cam.isOpened():
             print('Camera instance not open')
         if type(frame_size) is NoneType:
@@ -176,6 +165,5 @@ class CamReadError(Exception):
 
 class CamPropsError(Exception):
     def __init__(self, property_name):
-        assert property_name in self.properties.keys(), 'property name does not exist'
-        print('Error setting camera property')
+        print('Error setting camera property: {}'.format(property_name))
 

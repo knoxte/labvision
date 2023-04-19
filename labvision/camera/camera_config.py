@@ -18,12 +18,12 @@ class CameraType(Enum):
     'fps': ((30.0),)
     }
 
-    PANASONICHCX1000= {
+    PANASONICHCX1000 = {
     'res': (1920, 1080, 3),
     'fps': ((60.0),)
     }
 
-    PANASONICG9={
+    PANASONICG9 = {
     'res': ((1920, 1080, 3), (640, 480, 3), (1280, 720, 3), (480, 360, 3)),
     'fps': ((60.0),)
     }
@@ -36,15 +36,15 @@ class CameraType(Enum):
 
 class CameraProperty(Enum):
 
-    width = cv2.CAP_PROP_FRAME_WIDTH
-    height = cv2.CAP_PROP_FRAME_HEIGHT
-    fps = cv2.CAP_PROP_FPS
-    format = cv2.CAP_PROP_FORMAT
-    mode = cv2.CAP_PROP_MODE
-    saturation = cv2.CAP_PROP_SATURATION
-    gain = cv2.CAP_PROP_GAIN
-    hue = cv2.CAP_PROP_HUE
-    contrast = cv2.CAP_PROP_CONTRAST
-    brightness = cv2.CAP_PROP_BRIGHTNESS
-    exposure = cv2.CAP_PROP_EXPOSURE
-    auto_exposure = cv2.CAP_PROP_AUTO_EXPOSURE
+    WIDTH = cv2.CAP_PROP_FRAME_WIDTH
+    HEIGHT = cv2.CAP_PROP_FRAME_HEIGHT
+    FPS = cv2.CAP_PROP_FPS
+    FORMAT = cv2.CAP_PROP_FORMAT
+    MODE = cv2.CAP_PROP_MODE
+    SATURATION = cv2.CAP_PROP_SATURATION
+    GAIN = cv2.CAP_PROP_GAIN
+    HUE = cv2.CAP_PROP_HUE
+    CONTRAST = cv2.CAP_PROP_CONTRAST
+    BRIGHTNESS = cv2.CAP_PROP_BRIGHTNESS
+    EXPOSURE = cv2.CAP_PROP_EXPOSURE
+    AUTO_EXPOSURE = cv2.CAP_PROP_AUTO_EXPOSURE
