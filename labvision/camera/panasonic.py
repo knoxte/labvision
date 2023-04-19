@@ -1,14 +1,11 @@
-#from labvision.camera import CameraBase
-# from labvision.camera import QuickTimer
-from ctypes import Union
+
 import os
 import cv2
-import subprocess
 import time
 import pexpect
 import re
 import datetime
-from typing import List, Dict, Tuple, Union, Optional
+from typing import List, Optional
 
 time_sleep = 1
 

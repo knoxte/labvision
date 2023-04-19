@@ -1,13 +1,13 @@
 from types import NoneType
-from ..images import save
 import cv2
 import sys
 import os
 
-import datetime
-
 from .camera_config import CameraType, CameraProperty
 from typing import Optional, Tuple
+
+if os.name == 'nt':
+    import win32com.client
 
 
 class Camera:
@@ -38,11 +38,15 @@ class Camera:
 
     '''
 
+
+
+  
+
     def __init__(self, cam_num=None, cam_type : CameraType = CameraType.LOGITECH_HD_1080P, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
         if cam_num is None:
             cam_num = guess_camera_number()
 
-        self.cam = cv2.VideoCapture(cam_num, apiPreference=cv2.CAP_DSHOW)#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
+        self.cam = cv2.VideoCapture(cam_num, apiPreference=cam_type.value['apipreference'])#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
         self.get = self.cam.get
 
@@ -68,9 +72,10 @@ class Camera:
             raise CamPropsError(property)      
 
     def set_property(self, property: CameraProperty = CameraProperty.WIDTH, value=None):
-        if property in CameraProperty:
+        try:
+            self.set(property.value, value)
             setattr(self, property.name.lower(),self.get(property.value))
-        else:
+        except:
             raise CamPropsError(property)      
 
     def get_props(self, show=False):
@@ -94,7 +99,6 @@ class Camera:
         
         return properties
         
-
     def save_settings(self, filename):
         """Save current settings to a file"""
         self.get_props()
@@ -130,6 +134,12 @@ class Camera:
         self.close()
 
 WebCamera = Camera
+
+def get_cameras_windows(camera : CameraType):
+    wmi = win32com.client.GetObject("winmgmts:")
+    for usb in wmi.InstancesOf("Win32_USBHub"):
+        if usb.Name == CameraType.LOGITECH_HD_1080P.value['name']:
+            print('Found Logitech')
 
 
 def guess_camera_number():
