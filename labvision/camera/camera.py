@@ -42,10 +42,10 @@ class Camera:
 
   
 
-    def __init__(self, cam_num=None, cam_type : CameraType = CameraType.LOGITECH_HD_1080P, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
-        if cam_num is None:
-            cam_num = guess_camera_number()
-
+    def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
+        
+        cam_num, cam_type = get_camera(cam_num, cam_type)
+        
         self.cam = cv2.VideoCapture(cam_num, apiPreference=cam_type.value['apipreference'])#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
         self.get = self.cam.get
@@ -135,7 +135,7 @@ class Camera:
 
 WebCamera = Camera
 
-def get_camera_index_on_windows():
+def get_cameras_on_windows():
     """Scan a windows computer for any attached cameras which match CameraType's
     declarations. Assumes you only have one of each type of camera on your system.
     Builds a list of all cameras in order specified by system. Assumes you don't have
@@ -143,17 +143,53 @@ def get_camera_index_on_windows():
     """
     wmi = win32com.client.GetObject("winmgmts:")
     cam_names = [camera.value['name'] for _, camera in CameraType.__members__.items()]
-    camera_types = [camObject for camObject, _ in CameraType.__members__.items()]
-
+    camera_types = [camtype for _, camtype in CameraType.__members__.items()]
+    
     cam_objs = []
 
+    print('Following cameras are plugged in:')
     for usb in wmi.InstancesOf("Win32_USBHub"):
         if usb.Name in cam_names:
             cam_objs.append(camera_types[cam_names.index(usb.name)])
+            print(cam_objs[-1].name)
     
-    print(cam_objs)
+    
     
 
+    return cam_objs
+    
+def get_cameras_on_linux():
+    """Scan a linux system for cameras"""
+    items = os.listdir('/dev/')
+    newlist = []
+    for names in items:
+        if names.startswith("video"):
+            newlist.append(names)
+    print('needs implementing properly')
+    
+    return newlist
+
+def get_camera(cam_num : Optional[int], camtype : Optional[CameraType]):
+    """Looks to see whether camtype exists on system. If it does
+    returns the index used in OpenCV else raises error"""    
+    if os.name == 'nt':
+        cameras = get_cameras_on_windows()
+    else:
+        cameras = get_cameras_on_linux()
+
+    if len(cameras) == 0:
+        raise CameraNotDetected()
+    
+    if camtype == None:
+        if (cam_num == None):
+            cam_num=0
+        camtype=cameras[cam_num]
+    elif camtype.name in cameras:
+        cam_num = cameras.index(camtype.name)
+    else:
+        raise CameraNotDetected()
+
+    return cam_num, camtype
 
 def guess_camera_number_linux():
     """Function to find camera number assigned to cam by computer"""
@@ -178,6 +214,15 @@ def guess_camera_number_linux():
 #--------------------------------------------------------------------------------------------------------
 
 class CamReadError(Exception):
+    """CamReadError
+
+    Prints to terminal but doesn't raise terminate program
+
+    Parameters
+    ----------
+    Exception : _type_
+        _description_
+    """
     def __init__(self, cam, frame_size):
         print('Frame size: {}'.format(frame_size))
         if not cam.isOpened():
@@ -186,6 +231,19 @@ class CamReadError(Exception):
             print('No frame returned')
 
 class CamPropsError(Exception):
+    """CamPropsError prints to terminal but doesn't stop program
+
+    Parameters
+    ----------
+    Exception : _type_
+        _description_
+    """
     def __init__(self, property_name):
         print('Error setting camera property: {}'.format(property_name))
+        
+
+class CameraNotDetected(Exception):
+    def __init__(self) -> None:
+        print('Camera not detected. Check connection and value of CamType supplied')
+        super().__init__(*args)
 
