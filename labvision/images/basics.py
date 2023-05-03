@@ -20,11 +20,7 @@ __all__ = [
 
 def setupWindow(image,title=''):
     img_shape = get_shape(image)
-    if img_shape[2] == 0:
-        resolution =(img_shape[1],img_shape[1])
-    elif img_shape[2] == 3:
-        resolution = (img_shape[1],img_shape[0])
-    else:
+    if (img_shape[2] != 1) and (img_shape[2] != 3):
         raise NotImageError()
 
     w,h=get_monitor_size()

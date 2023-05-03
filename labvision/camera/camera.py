@@ -57,7 +57,7 @@ class Camera:
         """Get a frame from the camera and return"""
         ret, frame = self.cam.read()
         if not ret:
-            raise CamReadError(cam, frame)
+            raise CamReadError(self.cam, frame)
         return frame
 
     def close(self):
@@ -135,7 +135,7 @@ class Camera:
 
 WebCamera = Camera
 
-def get_cameras_on_windows():
+def get_cameras_on_windows(show=True):
     """Scan a windows computer for any attached cameras which match CameraType's
     declarations. Assumes you only have one of each type of camera on your system.
     Builds a list of all cameras in order specified by system. Assumes you don't have
@@ -149,12 +149,13 @@ def get_cameras_on_windows():
 
     print('Following cameras are plugged in:')
     for usb in wmi.InstancesOf("Win32_USBHub"):
+        if show:
+            print(usb.Name)
+            print(usb.DeviceId)
         if usb.Name in cam_names:
+           
             cam_objs.append(camera_types[cam_names.index(usb.name)])
-            print(cam_objs[-1].name)
-    
-    
-    
+            #print(cam_objs[-1].name)  
 
     return cam_objs
     
