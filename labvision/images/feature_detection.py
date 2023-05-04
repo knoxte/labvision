@@ -2,12 +2,11 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .basics import *
-from .thresholding import *
-
 from qtwidgets.config import ConfigGui
 from labvision.images.draw import draw_circle, gray_to_bgr, bgr_to_gray
 from labvision.images.geometric import get_shape
+from labvision.images.thresholding import threshold
+from labvision.images.basics import display
 
 __all__ = [
     "find_connected_components",

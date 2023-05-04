@@ -3,8 +3,7 @@ import numpy as np
 
 from qtwidgets.config import ConfigGui
 
-from .colors import bgr_to_gray, gray_to_bgr
-from .basics import *
+from labvision.images.colors import bgr_to_gray, gray_to_bgr
 
 __all__ = [
     'threshold',
@@ -20,6 +19,8 @@ def threshold(im, value=None, mode=cv2.THRESH_BINARY, configure=False):
     Thresholds an image
 
     Pixels below thresh set to black, pixels above set to white
+    modes =cv2.THRESH_BINARY (default), cv2.THRESH_BINARY_INV
+    complete list here (https://docs.opencv.org/4.x/d7/d1b/group__imgproc__misc.html#ggaa9e58d2860d4afa658ef70a9b1115576ac7e89a5e95490116e7d2082b3096b2b8)
     """
     
     if configure:
