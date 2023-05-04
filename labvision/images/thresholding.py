@@ -98,19 +98,23 @@ def distance_transform(img):
     dist_transform = cv2.distanceTransform(img, cv2.DIST_L2, 5)
     return dist_transform
 
-def absolute_diff(img, value, invert=False, configure=False):
+def absolute_diff(img, value, invert=False, normalise=False, configure=False):
     if configure:
-        param_dict = {'value':[100,1,255,1]}
-        gui = ConfigGui(im, absolute_diff, param_dict)
-        out = absolute_diff(im, **gui.reduced_dict)
+        param_dict = {'value':[100,1,255,1], 'normalise':[0, 0, 1, 1]}
+        gui = ConfigGui(img, absolute_diff, param_dict)
+        out = absolute_diff(img, **gui.reduced_dict)
         gui.app.quit()
     else:
-        subtract_frame = mean_val*np.ones(np.shape(img), dtype=np.uint8)  
+        subtract_frame = value*np.ones(np.shape(img), dtype=np.uint8)  
         frame1 = cv2.subtract(subtract_frame, img)
         frame1 = cv2.normalize(frame1, frame1 ,0,255,cv2.NORM_MINMAX)
         frame2 = cv2.subtract(img, subtract_frame)
         frame2 = cv2.normalize(frame2, frame2,0,255,cv2.NORM_MINMAX)
         out = cv2.add(frame1, frame2)
+
+        if normalise == True:
+            out = cv2.normalize(out, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+
     return out
 
 #---------------------------------------------------------
