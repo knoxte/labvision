@@ -19,10 +19,29 @@ __all__ = [
 ]
 
 
-def find_contours(img: np.ndarray, hierarchy=False):
+def find_contours(img : np.ndarray, hierarchy : bool=False):
+    """find_contours finds the contours in a binary image
+
+    Parameters
+    ----------
+    img : np.ndarray
+        binary image obtained from something like threshold
+    hierarchy : bool, optional
+        An object that allows you to explore the nestedness of contours.
+        see https://docs.opencv.org/4.x/d9/d8b/tutorial_py_contours_hierarchy.html
+
+    Returns
+    -------
+    A list of contours (and optionall a hierarchy object)
+    contours looks like:
+
+    contours = [ array([[[x,y]],
+                        [[x,y]],
+                        [[x,y]]], dtype=int32),
+                        array([[[x,y]],
+                        [[x,y]], dtype=int32)]
     """
-    contours is a tuple containing (img, contours)
-    """
+    
     # work for any version of opencv
     try:
         im, contours, hier = cv2.findContours(

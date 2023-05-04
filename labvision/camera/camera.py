@@ -35,13 +35,7 @@ class Camera:
 
     img = cam.get_frame()
 
-
     '''
-
-
-
-  
-
     def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
         
         cam_num, cam_type = get_camera(cam_num, cam_type)
@@ -153,10 +147,7 @@ def get_cameras_on_windows(show=True):
             print(usb.Name)
             print(usb.DeviceId)
         if usb.Name in cam_names:
-           
-            cam_objs.append(camera_types[cam_names.index(usb.name)])
-            #print(cam_objs[-1].name)  
-
+            cam_objs.append(camera_types[cam_names.index(usb.name)]) 
     return cam_objs
     
 def get_cameras_on_linux():
@@ -181,8 +172,8 @@ def get_camera(cam_num : Optional[int], camtype : Optional[CameraType]):
     if len(cameras) == 0:
         raise CameraNotDetected()
     
-    if camtype == None:
-        if (cam_num == None):
+    if camtype is None:
+        if (cam_num is None):
             cam_num=0
         camtype=cameras[cam_num]
     elif camtype.name in cameras:

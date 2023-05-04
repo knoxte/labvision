@@ -98,7 +98,9 @@ def distance_transform(img):
     dist_transform = cv2.distanceTransform(img, cv2.DIST_L2, 5)
     return dist_transform
 
-def absolute_diff(img, value, invert=False, normalise=False, configure=False):
+def absolute_diff(img, value, normalise=False, configure=False):
+    """Returns an image which is the absolute difference between value and pixel intensity
+    """
     if configure:
         param_dict = {'value':[100,1,255,1], 'normalise':[0, 0, 1, 1]}
         gui = ConfigGui(img, absolute_diff, param_dict)

@@ -167,3 +167,23 @@ def opening(img, kernel=3, kernel_type=None, iterations=1, configure=False):
             kernel = np.ones(kernel)
         out = cv2.morphologyEx(img, cv2.MORPH_OPEN, kernel, iterations=iterations)
     return out
+
+def fill_holes(frame : np.ndarray):
+    """Fill holes in a binary image
+
+    Parameters
+    ----------
+    frame : 2d np.ndarray
+        Should be a binary image
+
+    Returns
+    -------
+    binary image with holes filled
+    """
+    im_floodfill = frame.copy()
+    h, w = frame.shape[:2]
+    mask = np.zeros((h+2, w+2), np.uint8)
+    cv2.floodFill(im_floodfill, mask, (0,0), 255)
+    im_floodfill_inv = cv2.bitwise_not(im_floodfill)
+    out = frame | im_floodfill_inv
+    return out
