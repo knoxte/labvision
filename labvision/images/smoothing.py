@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 __all__ = ['gaussian_blur', 'median_blur']
 

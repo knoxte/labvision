@@ -3,8 +3,6 @@ import numpy as np
 from scipy import optimize as op
 from math import pi, cos, sin
 
-from labvision.images.geometric import get_shape
-
 __all__ = [
     "find_contours",
     "contour_to_xy",

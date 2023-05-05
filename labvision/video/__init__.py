@@ -437,9 +437,7 @@ def video_to_imgs(videoname, image_filename_stub, ext='.png'):
     """
 
     readvid = ReadVideo(videoname)
-    print('test')
     for i, img in enumerate(readvid):
-
         suffix = suffix_generator(i, num_figs=len(str(readvid.num_frames)))
         images.write_img(img, image_filename_stub + suffix + ext)
 

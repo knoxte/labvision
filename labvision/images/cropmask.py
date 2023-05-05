@@ -1,6 +1,5 @@
 from labvision.images.geometric import get_shape
-from typing import Tuple, Optional
-from qtwidgets import QImageViewer
+from typing import Tuple
 from qtwidgets.config import SelectShapeGui
 
 

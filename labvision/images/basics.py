@@ -1,5 +1,4 @@
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 from qtwidgets.config import get_monitor_size
 from labvision.images.geometric import get_shape

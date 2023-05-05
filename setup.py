@@ -21,8 +21,6 @@ setuptools.setup(
         'pillow',
         'scipy',
         'slicerator',
-        'ffmpeg-python',
-        'moviepy',
         'qtwidgets @ git+https://github.com/MikeSmithLabTeam/qtwidgets',
         'filehandling @ git+https://github.com/MikeSmithLabTeam/filehandling'
 
