@@ -1,9 +1,26 @@
 from labvision.images.geometric import get_shape
 from typing import Tuple, Optional
+from qtwidgets import QImageViewer
+from qtwidgets.config import SelectShapeGui
+
 
 Pts = Tuple[Tuple[int,int],Tuple[int,int]]
 
-def crop(frame, cropbox=None):
+def viewer(img, shape='rect', handle_rad=5):
+    """viewer gives you a quick way to work out the coords for your crop or mask
+
+    The points are printed to the command line and should be entered into cropbox
+    of pts in the appropriate mask
+
+    Parameters
+    ----------
+    img : np.ndarray - image to be cropped or masked
+    shape : 'rect', 'circle', 'ellipse', 'polygon'   
+    """
+    SelectShapeGui(img, shape=shape, handle_rad=handle_rad)
+    
+
+def crop(frame, cropbox):
     """crop a frame
 
     Parameters
@@ -20,14 +37,13 @@ def crop(frame, cropbox=None):
     _type_
         _description_
     """
-    if cropbox is not None:
-        if get_shape(frame)[2] == 3:
-            frame=frame[cropbox[0][1]:cropbox[1][1],
-                        cropbox[0][0]: cropbox[1][0],:]
-        else:
-            assert get_shape(frame)[2] == 1, 'Not valid frame depth'
-            frame=frame[cropbox[0][1]:cropbox[1][1],
-                    cropbox[0][0]: cropbox[1][0]]
+    if get_shape(frame)[2] == 3:
+        frame=frame[cropbox[0][1]:cropbox[1][1],
+                    cropbox[0][0]: cropbox[1][0],:]
+    else:
+        assert get_shape(frame)[2] == 1, 'Not valid frame depth'
+        frame=frame[cropbox[0][1]:cropbox[1][1],
+                cropbox[0][0]: cropbox[1][0]]
     return frame
 
 """Masking
@@ -134,3 +150,4 @@ def apply_mask(img, mask):
 def _create_zeros_mask(shape : Tuple[int, int]):
     zeros_mask = np.zeros(shape, dtype=np.uint8)
     return zeros_mask
+

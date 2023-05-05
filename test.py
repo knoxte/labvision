@@ -1,10 +1,5 @@
-from labvision.camera import Camera, get_cameras_on_windows
-from labvision.camera.camera_config import CameraProperty
-from labvision.images import display
-from tests.test_camera import test_camera_get_property
 
-# cam = Camera(1)
-# display(cam.get_frame())
+import numpy as np
+from labvision.images.cropmask import viewer
 
-cam = Camera()
-display(cam.get_frame())
+viewer(np.zeros((2000, 2000, 3)), shape='polygon')
