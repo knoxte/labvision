@@ -1,6 +1,8 @@
 from labvision.images.geometric import get_shape
 from typing import Tuple
 from qtwidgets.config import SelectShapeGui
+import numpy as np
+import cv2
 
 
 Pts = Tuple[Tuple[int,int],Tuple[int,int]]
