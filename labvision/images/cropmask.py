@@ -19,7 +19,7 @@ def viewer(img, shape='rect', handle_rad=5):
     shape : 'rect', 'circle', 'ellipse', 'polygon'   
     """
     select=SelectShapeGui(img, shape=shape, handle_rad=handle_rad)
-    return select.pts
+    return tuple(select.pts)
     
 
 def crop(frame, cropbox):
