@@ -172,12 +172,14 @@ def get_camera(cam_num : Optional[int], camtype : Optional[CameraType]):
     if len(cameras) == 0:
         raise CameraNotDetected()
     
+    cam_names = [camera.name for camera in cameras]
+
     if camtype is None:
         if (cam_num is None):
             cam_num=0
         camtype=cameras[cam_num]
-    elif camtype.name in cameras:
-        cam_num = cameras.index(camtype.name)
+    elif camtype.name in cam_names:
+        cam_num = cam_names.index(camtype.name)
     else:
         raise CameraNotDetected()
 

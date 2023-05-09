@@ -16,7 +16,8 @@ def viewer(img, shape='rect', handle_rad=5):
     img : np.ndarray - image to be cropped or masked
     shape : 'rect', 'circle', 'ellipse', 'polygon'   
     """
-    SelectShapeGui(img, shape=shape, handle_rad=handle_rad)
+    select=SelectShapeGui(img, shape=shape, handle_rad=handle_rad)
+    return select.pts
     
 
 def crop(frame, cropbox):
