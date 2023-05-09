@@ -87,7 +87,7 @@ def mask_polygon(shape : Tuple[int,int], pts : Pts):
     -------
     binary image
     """
-    mask = _create_zeros_mask()
+    mask = _create_zeros_mask(shape)
     #calculate mask given points
     poly = []
     for point in pts:
@@ -107,7 +107,7 @@ def mask_circle(shape : Tuple[int,int], pts : Pts):
     -------
     binary image
     """
-    mask = _create_zeros_mask(shape=shape)
+    mask = _create_zeros_mask(shape)
 
     radius = ((pts[1][1]-pts[0][1])**2+(pts[1][0]-pts[0][0])**2)**0.5
     mask = cv2.circle(mask, pts[0],int(radius),255,thickness=-1)
