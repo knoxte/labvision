@@ -6,6 +6,8 @@ with open("README.md", "r") as fh:
 with open("LICENSE", "r") as fh:
     license = fh.read()
 
+print(setuptools.find_packages(exclude=('tests','docs'))
+
 setuptools.setup(
     name='labvision',
     version='0.1',
