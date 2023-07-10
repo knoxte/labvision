@@ -6,9 +6,6 @@ with open("README.md", "r") as fh:
 with open("LICENSE", "r") as fh:
     license = fh.read()
 
-print('My debug')
-print(setuptools.find_packages(exclude=('tests','docs')))
-print('end_debug')
 
 setuptools.setup(
     name='labvision',
