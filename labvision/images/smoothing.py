@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 __all__ = ['gaussian_blur', 'median_blur']
 
@@ -23,6 +22,7 @@ def gaussian_blur(img, kernel=(3, 3)):
     out: output image
         Same size and type as img
     """
+    
     out = cv2.GaussianBlur(img, kernel, 0)
     return out
 

@@ -2,45 +2,81 @@ import cv2
 import numpy as np
 from scipy import optimize as op
 from math import pi, cos, sin
-from .basics import *
 
 __all__ = [
     "find_contours",
+    "contour_to_xy",
     "center_of_mass",
+    "contour_props",
+    "bounding_rectangle",
     "rotated_bounding_rectangle",
     "sort_contours",
+    "cut_out_object",
     "find_contour_corners",
-    "fit_hex",
-    "cut_out_object"
-
+    "fit_hex"
 ]
 
 
-def find_contours(img, hierarchy=False):
+def find_contours(img : np.ndarray, hierarchy : bool=False):
+    """find_contours finds the contours in a binary image
+
+    Parameters
+    ----------
+    img : np.ndarray
+        binary image obtained from something like threshold
+    hierarchy : bool, optional
+        An object that allows you to explore the nestedness of contours.
+        see https://docs.opencv.org/4.x/d9/d8b/tutorial_py_contours_hierarchy.html
+
+    Returns
+    -------
+    A list of contours (and optionall a hierarchy object)
+    contours looks like:
+
+    contours = [ array([[[x,y]],
+                        [[x,y]],
+                        [[x,y]]], dtype=int32),
+                        array([[[x,y]],
+                        [[x,y]], dtype=int32)]
     """
-    contours is a tuple containing (img, contours)
-    """
-    # work for any version of opencv
-    try:
-        im, contours, hier = cv2.findContours(
+    
+    contours, hier = cv2.findContours(
             img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    except:
-        contours, hier = cv2.findContours(
-            img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
     if hierarchy:
         return contours, hier
     else:
         return contours
 
+def contour_to_xy(contour):
+    """Converts a contour to an x and y array of points
+     useful for plotting """
+    x = np.array([pt[0][0] for pt in contour])
+    y = np.array([pt[0][1] for pt in contour])
+    return x,y
 
-def center_of_mass(im):
-    moments = cv2.moments(im)
+def center_of_mass(contour):
+    """Find the centre of mass of a contour"""
+    moments = cv2.moments(contour)
     cx = int(moments['m10'] / moments['m00'])
     cy = int(moments['m01'] / moments['m00'])
     return cx, cy
 
+def contour_props(contour, closed=True):
+    """Find contour area. Assumes contour is closed
+    unless closed is set to False."""
+    cx,cy = center_of_mass(contour)
+    Perim = cv2.arcLength(contour, closed)
+    Area = cv2.contourArea(contour)
+    return (cx,cy),Perim,Area
+
+def bounding_rectangle(contour):
+    """Rectangle bounding a contour which has length and width aligned with cartesian axes"""
+    x, y, w, h = cv2.boundingRect(contour)
+    return x,y,w,h
 
 def rotated_bounding_rectangle(contour):
+    """Bounding rectangle which rotates to minimise area enclosing the contour"""
     rect = cv2.minAreaRect(contour)
     box = cv2.boxPoints(rect)
     box = np.int0(box)
@@ -48,7 +84,6 @@ def rotated_bounding_rectangle(contour):
     info = {'cx': rect[0][0], 'cy': rect[0][1], 'angle': rect[2],
             'length': dim[0], 'width': dim[1], 'box': box}
     return info
-
 
 def sort_contours(cnts):
     """
@@ -73,6 +108,38 @@ def sort_contours(cnts):
         cnts_new.append(cnts[arg])
     return cnts_new
 
+def cut_out_object(im, contour, buffer=3, setsurroundblack=False):
+    """
+    Cuts out a horizontal box around a contour.
+    """
+    x, y, w, h = cv2.boundingRect(contour)
+
+    # Add buffer zone round img
+    x -= buffer
+    y -= buffer
+    w += 2 * buffer
+    h += 2 * buffer
+
+    # Check not outside original images
+    maxy, maxx = np.shape(im)[:2]
+    x = 0 if x < 0 else x
+    y = 0 if y < 0 else y
+    h = maxy - y if y + h > maxy else h
+    w = maxx - x if x + w > maxx else w
+
+    cut_img = im[y:y + h, x:x + w]
+    if setsurroundblack:
+        cut_img[0, :] = 0
+        cut_img[:, 0] = 0
+        cut_img[:, -1] = 0
+        cut_img[-1, :] = 0
+
+    return cut_img, (x, y, w, h)
+
+#---------------------------------------------------------
+# Untested below here. Kept for historical reasons.
+# Write tests before using.
+# ------------------------------------------------
 
 def find_contour_corners(cnt, n, aligned=True):
     """
@@ -107,7 +174,6 @@ def find_contour_corners(cnt, n, aligned=True):
         corners.append(in_region[0][max_r])
     return corners, (xc, yc)
 
-
 def fit_hex(contour):
     """
     Fits a regular hexagon to a list of points.
@@ -122,7 +188,7 @@ def fit_hex(contour):
     return hex_corners
 
 
-def hexagon(xc, yc, r, theta):
+def hexagon(xc: int, yc: int, r: int, theta: float):
     points = [[xc + r * cos(t + theta), yc + r * sin(t + theta)]
               for t in [0, pi / 3, 2 * pi / 3, pi, 4 * pi / 3, 5 * pi / 3]]
     return np.array(points)
@@ -145,31 +211,3 @@ def hex_dist(params, contour):
     return np.sum(distances)
 
 
-def cut_out_object(im, contour, buffer=3, setsurroundblack=False):
-    """
-    Cuts out a horizontal box around a contour.
-    """
-    colordepth = depth(im)
-    x, y, w, h = cv2.boundingRect(contour)
-
-    # Add buffer zone round img
-    x -= buffer
-    y -= buffer
-    w += 2 * buffer
-    h += 2 * buffer
-
-    # Check not outside original images
-    maxy, maxx = np.shape(im)[:2]
-    x = 0 if x < 0 else x
-    y = 0 if y < 0 else y
-    h = maxy - y if y + h > maxy else h
-    w = maxx - x if x + w > maxx else w
-
-    cut_img = im[y:y + h, x:x + w]
-    if setsurroundblack:
-        cut_img[0, :] = 0
-        cut_img[:, 0] = 0
-        cut_img[:, -1] = 0
-        cut_img[-1, :] = 0
-
-    return cut_img, (x, y, w, h)

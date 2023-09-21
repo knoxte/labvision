@@ -1,70 +1,16 @@
-from .camera_config import *
-from ..images import Displayer, display, save
-import datetime
+from types import NoneType
 import cv2
 import sys
 import os
 
+from .camera_config import CameraType, CameraProperty
+from typing import Optional, Tuple
 
-class CameraBase:
-    """
-    Camera is a simple base class that handles some of the operations common
-    to different types of cameras. Its child classes are Camera which handles webcams.
-    and DigitalCamera in digital_camera.py which handles digital cameras.
-    """
-    def __init__(self, cam_type):
-        self.cam_type=cam_type
+if os.name == 'nt':
+    import win32com.client
 
 
-    def set_property(self, property=None, value=None):
-        try:
-            self.set(property, value)
-        except:
-            raise CamPropsError(property)
-
-    def get_property(self, property=None):
-        try:
-            self.get(property)
-        except:
-            raise CamPropsError(property)
-
-    def _timestamp(self):
-        shot_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        return shot_time
-
-    def show_frame(self):
-        # Base
-        frame = self.get_frame()
-        display(frame, 'Current frame')
-
-    def preview(self):
-        # Base
-        window = Displayer('Camera')
-        loop = True
-        while loop:
-            frame = self.get_frame()
-            window.update_im(frame)
-            if not window.active:
-                loop = False
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.close()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if True:
-            return self.get_frame()
-        else:
-            raise StopIteration
-
-
-
-class WebCamera(CameraBase):
+class Camera:
     '''
     This class is called WebCamera but can also be called
     as Camera for historical reasons.
@@ -72,6 +18,7 @@ class WebCamera(CameraBase):
     are described in camera_config.py. Each camera has a
     dictionary of basic settings. If you use a new camera add
     it to that file and give it a name in capitals.
+
     Parameters
     ----------
     cam_num : int or None   Defines the camera to which the instance points
@@ -80,111 +27,74 @@ class WebCamera(CameraBase):
     Values are in position Zero in the Dict['frame_size']
     fps : int    Only needs to be defined if you want a non-default value. Default
     Values are in position Zero in the Dict['fps']
+
+
     Examples
     --------
-    webcam = Camera(cam_type=EXAMPLE_CAMERA)
-    img = webcam.get_frame()
-    webcam.save_frame(filename, time_stamp=True)
+    cam = Camera(cam_type=EXAMPLE_CAMERA)
+
+    img = cam.get_frame()
+
     '''
-    def __init__(self, cam_num=None, cam_type=LOGITECH_HD_1080P, frame_size=None, fps=None, ):
-
-        if cam_num is None:
-            cam_num = guess_camera_number()
-
-        self.cam = cv2.VideoCapture(cam_num)
+    def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
+        
+        cam_num, cam_type = get_camera(cam_num, cam_type)
+        
+        self.cam = cv2.VideoCapture(cam_num, apiPreference=cam_type.value['apipreference'])#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
         self.get = self.cam.get
-        super(WebCamera, self).__init__(cam_type)
 
-        frame_sizes = cam_type['res']
-        frame_rates = cam_type['fps']
-
-        if frame_size is None:
-            self.width, self.height = frame_sizes[0][:2]
-        elif frame_size in frame_sizes:
-            self.width, self.height = frame_size[:2]
-        else:
-            raise Exception('Frame shape not possible')
-
-        if fps is None:
-            frame_rate = frame_rates[0]
-        elif fps in frame_rates:
-            frame_rate = fps
-        else:
-            raise Exception('Frame rate not possible')
-
-        self.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-        self.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
-        self.set(cv2.CAP_PROP_FPS, frame_rate)
-
-        ret, frame = self.cam.read()
-        assert ret, 'Frame Reading Error'
+        if not self.cam.isOpened():
+            raise CamReadError(self.cam, None)
 
     def get_frame(self):
         """Get a frame from the camera and return"""
-
         ret, frame = self.cam.read()
+        if not ret:
+            raise CamReadError(self.cam, frame)
         return frame
-
-    def save_frame(self, filename, time_stamp=True):
-        """
-        Get a frame from camera and save with filename. By
-        default a timestamp is added to the end of the filename.
-        Set time_stamp=False to prevent this behaviour."""
-
-        frame = self.get_frame()
-        fname, ext = filename.split('.')
-        if time_stamp:
-            save(frame, fname + self._timestamp() + '.' + ext)
-        else:
-            save(frame, filename)
-        return filename
 
     def close(self):
         """Release the OpenCV camera instance"""
-
         self.cam.release()
+
+    def get_property(self, property : CameraProperty=CameraProperty.WIDTH):
+        if property in CameraProperty:
+            setattr(self, property.name.lower(),self.get(property.value))
+            return getattr(self, property.name.lower())
+        else:
+            raise CamPropsError(property)      
+
+    def set_property(self, property: CameraProperty = CameraProperty.WIDTH, value=None):
+        try:
+            self.set(property.value, value)
+            setattr(self, property.name.lower(),self.get(property.value))
+        except:
+            raise CamPropsError(property)      
 
     def get_props(self, show=False):
         """Retrieve a complete list of camera property values.
         Set show=True to print to the terminal"""
-
-        self.width = self.get(cv2.CAP_PROP_FRAME_WIDTH)
-        self.height = self.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        self.fps = self.get(cv2.CAP_PROP_FPS)
-        self.format = self.get(cv2.CAP_PROP_FORMAT)
-        self.mode = self.get(cv2.CAP_PROP_MODE)
-        self.saturation = self.get(cv2.CAP_PROP_SATURATION)
-        self.gain = self.get(cv2.CAP_PROP_GAIN)
-        self.hue = self.get(cv2.CAP_PROP_HUE)
-        self.contrast = self.get(cv2.CAP_PROP_CONTRAST)
-        self.brightness = self.get(cv2.CAP_PROP_BRIGHTNESS)
-        self.exposure = self.get(cv2.CAP_PROP_EXPOSURE)
-        self.auto_exposure = self.get(cv2.CAP_PROP_AUTO_EXPOSURE)
+        properties = {}
+        for property in CameraProperty:
+            cam_value = self.get(property.value)
+            setattr(self, property.name.lower(), cam_value)
+            properties[property.name.lower()]= cam_value
 
         if show:
             print('----------------------------')
             print('List of Video Properties')
             print('----------------------------')
-            print('width : ', self.width)
-            print('height : ', self.height)
-            print('fps : ', self.fps)
-            print('format : ', self.format)
-            print('mode : ', self.mode)
-            print('brightness : ', self.brightness)
-            print('contrast : ', self.contrast)
-            print('hue : ', self.hue)
-            print('saturation : ', self.saturation)
-            print('gain : ', self.gain)
-            print('exposure :', self.exposure)
-            print('auto_exposure:', self.auto_exposure)
+            for property in CameraProperty:
+                print(property.name.lower() + ' : {}'.format(getattr(self, property.name.lower())))
             print('')
             print('unsupported features return 0')
             print('-----------------------------')
-
+        
+        return properties
+        
     def save_settings(self, filename):
         """Save current settings to a file"""
-
         self.get_props()
         settings = (
             self.brightness,
@@ -204,26 +114,88 @@ class WebCamera(CameraBase):
         with open(filename, 'r') as f:
             settings = f.read().splitlines()
         self.brightness, self.contrast, self.gain, \
-        self.saturation, self.hue, self.exposure = settings
-        self.set_property('brightness', self.brightness)
-        self.set_property('contrast', self.contrast)
-        self.set_property('gain', self.gain)
-        self.set_property('hue', self.hue)
-        self.set_property('exposure', self.exposure)
+            self.saturation, self.hue, self.exposure = settings
+        self.set(CameraProperty.BRIGHTNESS, self.brightness)
+        self.set(CameraProperty.CONTRAST, self.contrast)
+        self.set(CameraProperty.GAIN, self.gain)
+        self.set(CameraProperty.HUE, self.hue)
+        self.set(CameraProperty.EXPOSURE, self.exposure)
 
-Camera = WebCamera
+    def __enter__(self):
+        return self
 
-def guess_camera_number():
-    """Function to find camera number assigned to webcam by computer"""
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.close()
+
+WebCamera = Camera
+
+def get_cameras_on_windows(show=True):
+    """Scan a windows computer for any attached cameras which match CameraType's
+    declarations. Assumes you only have one of each type of camera on your system.
+    Builds a list of all cameras in order specified by system. Assumes you don't have
+    cameras that are unlisted in CameraType plugged in.
+    """
+    wmi = win32com.client.GetObject("winmgmts:")
+    cam_names = [camera.value['name'] for _, camera in CameraType.__members__.items()]
+    camera_types = [camtype for _, camtype in CameraType.__members__.items()]
+    
+    cam_objs = []
+
+    print('Following cameras are plugged in:')
+    for usb in wmi.InstancesOf("Win32_USBHub"):
+        if show:
+            print(usb.Name)
+            print(usb.DeviceId)
+        if usb.Name in cam_names:
+            cam_objs.append(camera_types[cam_names.index(usb.name)]) 
+    return cam_objs
+    
+def get_cameras_on_linux():
+    """Scan a linux system for cameras"""
+    items = os.listdir('/dev/')
+    newlist = []
+    for names in items:
+        if names.startswith("video"):
+            newlist.append(names)
+    print('needs implementing properly')
+    
+    return newlist
+
+def get_camera(cam_num : Optional[int], camtype : Optional[CameraType]):
+    """Looks to see whether camtype exists on system. If it does
+    returns the index used in OpenCV else raises error"""    
+    if os.name == 'nt':
+        cameras = get_cameras_on_windows()
+    else:
+        cameras = get_cameras_on_linux()
+
+    if len(cameras) == 0:
+        raise CameraNotDetected()
+    
+    cam_names = [camera.name for camera in cameras]
+
+    if camtype is None:
+        if (cam_num is None):
+            cam_num=0
+        camtype=cameras[cam_num]
+    elif camtype.name in cam_names:
+        cam_num = cam_names.index(camtype.name)
+    else:
+        raise CameraNotDetected()
+
+    return cam_num, camtype
+
+def guess_camera_number_linux():
+    """Function to find camera number assigned to cam by computer"""
 
     try:
-        assert ('linux' in sys.platform), "guess_camera_number only implemented for linux"
-        items = os.listdir('/dev/')
-        newlist = []
-        for names in items:
-            if names.startswith("video"):
-                newlist.append(names)
-        cam_num = int(newlist[0][5:])
+        if 'linux' in sys.platform:
+            items = os.listdir('/dev/')
+            newlist = []
+            for names in items:
+                if names.startswith("video"):
+                    newlist.append(names)
+            cam_num = int(newlist[0][5:])
     except AssertionError as error:
         print(error)
         print("Camera number set to 0")
@@ -231,8 +203,41 @@ def guess_camera_number():
 
     return cam_num
 
+#--------------------------------------------------------------------------------------------------------
+# Exceptions
+#--------------------------------------------------------------------------------------------------------
+
+class CamReadError(Exception):
+    """CamReadError
+
+    Prints to terminal but doesn't raise terminate program
+
+    Parameters
+    ----------
+    Exception : _type_
+        _description_
+    """
+    def __init__(self, cam, frame_size):
+        print('Frame size: {}'.format(frame_size))
+        if not cam.isOpened():
+            print('Camera instance not open')
+        if type(frame_size) is NoneType:
+            print('No frame returned')
 
 class CamPropsError(Exception):
+    """CamPropsError prints to terminal but doesn't stop program
+
+    Parameters
+    ----------
+    Exception : _type_
+        _description_
+    """
     def __init__(self, property_name):
-        assert property_name in self.properties.keys(), 'property name does not exist'
-        print('Error setting camera property')
+        print('Error setting camera property: {}'.format(property_name))
+        
+
+class CameraNotDetected(Exception):
+    def __init__(self) -> None:
+        print('Camera not detected. Check connection and value of CamType supplied')
+        super().__init__(*args)
+

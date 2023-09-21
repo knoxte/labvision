@@ -1,10 +1,48 @@
 import numpy as np
 import cv2
 
+from labvision.custom_exceptions import NotImageError
+
 from .basics import *
 from .colors import *
 
-__all__ = ['resize', 'rotate', 'hstack', 'vstack']
+__all__ = ['resize', 'rotate', 'hstack', 'vstack', 'to_uint8']
+
+
+def get_shape(img):
+    """get_shape
+
+    Returns width, height, depth for an image
+
+    Parameters
+    ----------
+    img: Array containing an image
+
+    Returns
+    -------
+    width: int
+        Width of the image
+    height: int
+        Height of the image
+    depth: int
+       Color depth of the image
+    Notes
+    -----
+    Width of an image is the first dimension for numpy arrays.
+    Height of an image is the first dimension for openCV
+    """
+    shp = np.shape(img)
+    if len(shp) == 2:
+        d = 1
+    elif len(shp) == 3:
+        d = shp[2]
+    else:
+        raise NotImageError
+
+    w = shp[0]
+    h = shp[1]
+
+    return w, h, d
 
 
 def resize(img, percent=25.0):
@@ -24,7 +62,7 @@ def resize(img, percent=25.0):
         The image after it's been resized
 
     """
-    w, h = width_and_height(img)
+    w, h = np.shape(img)[1], np.shape(img)[0]
     dim = (int(w * percent / 100), int(h * percent / 100))
     return cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
 
@@ -49,7 +87,8 @@ def rotate(img, angle):
     """
     # grab the dimensions of the image and then determine the
     # center
-    (h, w) = img.shape[:2]
+    img_shape = np.shape(img)
+    (h, w) = img_shape[:2]
     (c_x, c_y) = (w // 2, h // 2)
 
     # grab the rotation matrix (applying the negative of the
@@ -74,19 +113,20 @@ def rotate(img, angle):
 
 def hstack(*args):
     """
-    Stacks images horizontally
+    Stacks images horizontally. 
 
-    If image depths are mismatched then converts grayscale images to bgr before stacking
+    If all grayscale or all colour leaves depth unchanged. If image depths are mismatched 
+    then converts grayscale images to bgr before stacking
     """
-    depths = [depth(im) for im in args]
-    gray = [d == 1 for d in depths]
-    if all(gray):
-        return np.hstack(args)
-    elif not all(gray):
-        return np.hstack(args)
-    else:
-        ims = [gray_to_bgr(im) if depth(im) == 1 else im for im in args]
-        return np.hstack(ims)
+    num_imgs = len(args)
+    sum_depths = sum([get_shape(im)[2] for im in args])
+    all_colour = (sum_depths * num_imgs / 3) == num_imgs
+    all_gray = (sum_depths * num_imgs) == num_imgs
+    if not (all_colour | all_gray):
+        # mixture of gray and colour
+        args = [gray_to_bgr(im) if get_shape(im)[2] ==
+                1 else im for im in args]
+    return np.hstack(args)
 
 
 def vstack(*args):
@@ -95,10 +135,16 @@ def vstack(*args):
 
     If image depths are mismatched then converts grayscale images to bgr before stacking
     """
-    depths = [depth(im) for im in args]
-    gray = [d == 1 for d in depths]
-    if all(gray):
-        return np.vstack(args)
-    else:
-        ims = [gray_to_bgr(im) if depth(im) == 1 else im for im in args]
-        return np.vstack(ims)
+    num_imgs = len(args)
+    sum_depths = sum([get_shape(im)[2] for im in args])
+    all_colour = (sum_depths * num_imgs / 3) == num_imgs
+    all_gray = (sum_depths * num_imgs) == num_imgs
+    if not (all_colour | all_gray):
+        args = [gray_to_bgr(im) if get_shape(im)[2] == 1 else im for im in args]
+    return np.vstack(args)
+
+
+def to_uint8(im):
+    """Convert image to 8 bit"""
+    im = (im - np.min(im)) / (np.max(im) - np.min(im)) * 255
+    return np.uint8(im)
