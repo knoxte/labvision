@@ -1,4 +1,6 @@
-from labvision.tests.test_video.test_opencv_io import test_read_video_frame_mp4
 
+import numpy as np
+from labvision.images.cropmask import viewer
 
-test_read_video_frame_mp4()
+pts=viewer(np.zeros((2000, 2000, 3)), shape='polygon')
+print(pts)

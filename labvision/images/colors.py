@@ -16,10 +16,6 @@ __all__ = [
     'PURPLE',
     'GREEN',
     'MAROON',
-    'bgr_to_hsv',
-    'bgr_to_lab',
-    'hsv_to_bgr',
-    'lab_to_bgr',
     'bgr_to_gray',
     'gray_to_bgr',
 ]
@@ -41,25 +37,11 @@ GREEN = (0, 128, 0)
 MAROON = (0, 0, 128)
 
 
-def bgr_to_hsv(im):
-    return cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-
-
-def bgr_to_lab(im):
-    return cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
-
-
-def hsv_to_bgr(im):
-    return cv2.cvtColor(im, cv2.COLOR_HSV2BGR)
-
-
-def lab_to_bgr(im):
-    return cv2.cvtColor(im, cv2.COLOR_LAB2BGR)
-
 
 def bgr_to_gray(im):
     return cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-
 def gray_to_bgr(im):
     return cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
+
+
