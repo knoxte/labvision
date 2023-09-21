@@ -40,13 +40,9 @@ def find_contours(img : np.ndarray, hierarchy : bool=False):
                         [[x,y]], dtype=int32)]
     """
     
-    # work for any version of opencv
-    try:
-        im, contours, hier = cv2.findContours(
+    contours, hier = cv2.findContours(
             img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    except:
-        contours, hier = cv2.findContours(
-            img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    
     if hierarchy:
         return contours, hier
     else:
