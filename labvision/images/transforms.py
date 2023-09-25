@@ -3,7 +3,7 @@ import numpy as np
 
 from qtwidgets.config import ConfigGui
 
-from labvision.images.colors import bgr_to_gray, gray_to_bgr
+from labvision.images.colours import bgr_to_gray, gray_to_bgr
 
 __all__ = [
     'brightness_contrast',
@@ -28,7 +28,7 @@ def brightness_contrast(img, brightness=0, contrast=0, configure=False):
         brightness_contrast_img =  cv2.convertScaleAbs(frame, alpha=parameters['contrast'], beta=parameters['brightness'])
     return brightness_contrast_img
 
-def gamma(img, gamma=1.0, configure=False):
+def gamma(gray_img, gamma=1.0, configure=False):
     '''
     Apply look up table to image with power gamma
 
@@ -57,8 +57,8 @@ def gamma(img, gamma=1.0, configure=False):
     '''
     if configure:
         param_dict = {'gamma':[gamma,0,50,0.001]}
-        gui = ConfigGui(img, gamma, param_dict)
-        gamma_img = gamma(img, **gui.reduced_dict)
+        gui = ConfigGui(gray_img, gamma, param_dict)
+        gamma_img = gamma(gray_img, **gui.reduced_dict)
         gui.app.quit()
     else:
         # build a lookup table mapping the pixel values [0, 255] to
@@ -70,10 +70,10 @@ def gamma(img, gamma=1.0, configure=False):
         table = np.array([((i / 255.0) ** invGamma) *
                         255 for i in np.arange(0, 256)]).astype("uint8")
 
-        gamma_img = cv2.LUT(image, table)
+        gamma_img = cv2.LUT(gray_img, table)
     return gamma_img
 
-def distance(img):
+def distance(bw_img, normalise=True):
     """
     Calculates the distance to the closest zero pixel for each pixel.
 
@@ -96,16 +96,18 @@ def distance(img):
     Pedro Felzenszwalb and Daniel Huttenlocher. Distance transforms of sampled
     functions. Technical report, Cornell University, 2004.
     """
-    dist_transform = cv2.distanceTransform(img, cv2.DIST_L2, 5)
-    return dist_transform
+    gray_img = cv2.distanceTransform(bw_img, cv2.DIST_L2, 5)
+    if normalise:
+        gray_img = 255 * gray_img / np.max(gray_img)
+    return gray_img
 
-def absolute_diff(img, value, normalise=False, configure=False):
+def absolute_diff(img, value=0, normalise=False, configure=False):
     """Returns an image which is the absolute difference between value and pixel intensity
     """
     if configure:
         param_dict = {'value':[100,1,255,1], 'normalise':[0, 0, 1, 1]}
         gui = ConfigGui(img, absolute_diff, param_dict)
-        out = absolute_diff(img, **gui.reduced_dict)
+        img = absolute_diff(img, **gui.reduced_dict)
         gui.app.quit()
     else:
         subtract_frame = value*np.ones(np.shape(img), dtype=np.uint8)  
@@ -113,12 +115,12 @@ def absolute_diff(img, value, normalise=False, configure=False):
         frame1 = cv2.normalize(frame1, frame1 ,0,255,cv2.NORM_MINMAX)
         frame2 = cv2.subtract(img, subtract_frame)
         frame2 = cv2.normalize(frame2, frame2,0,255,cv2.NORM_MINMAX)
-        out = cv2.add(frame1, frame2)
+        img = cv2.add(frame1, frame2)
 
         if normalise == True:
-            out = cv2.normalize(out, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
+            img = cv2.normalize(img, None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
 
-    return out
+    return img
 
 #---------------------------------------------------------
 # Not actively used or tested. kept for historical reasons #---------------------------------------------------------

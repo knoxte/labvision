@@ -1,5 +1,5 @@
 from .basics import *
-from .colors import *
+from .colours import *
 from .cropmask import *
 from .thresholds import *
 from .draw import *

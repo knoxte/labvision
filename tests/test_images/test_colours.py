@@ -1,4 +1,4 @@
-from labvision.images.colors import bgr_to_gray, gray_to_bgr
+from labvision.images.colours import bgr_to_gray, gray_to_bgr
 from tests import rgb_img_test, grayscale_img_test
 
 import numpy as np

@@ -3,7 +3,7 @@ import numpy as np
 
 from qtwidgets.config import ConfigGui
 
-from labvision.images.colors import bgr_to_gray, gray_to_bgr
+from labvision.images.colours import bgr_to_gray, gray_to_bgr
 
 __all__ = [
     'threshold',

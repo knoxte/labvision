@@ -4,7 +4,7 @@ import cv2
 from labvision.custom_exceptions import NotImageError
 
 from .basics import *
-from .colors import *
+from .colours import *
 
 __all__ = ['resize', 'rotate', 'hstack', 'vstack', 'to_uint8']
 
