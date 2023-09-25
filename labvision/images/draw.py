@@ -16,10 +16,10 @@ __all__ = [
     "draw_contours"
 ]
 
-def draw_circle(im, cx, cy, rad, color=YELLOW, thickness=2):
+def draw_circle(img, cx, cy, rad, color=YELLOW, thickness=2):
     """Draws single Circle on an image
 
-    :param im:RGB image as np.ndarray
+    :param img:RGB image as np.ndarray
     :param cx: x centre of circle
     :param cy: y centre of circle
     :param rad: radius of circle
@@ -29,17 +29,17 @@ def draw_circle(im, cx, cy, rad, color=YELLOW, thickness=2):
     :return: image with circle drawn on it
 
     """
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
-    cv2.circle(im, (int(cx), int(cy)), int(rad), color, thickness)
-    return im
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
+    cv2.circle(img, (int(cx), int(cy)), int(rad), color, thickness)
+    return img
 
-def draw_polygon(im: np.ndarray, vertices, color=RED, thickness=1):
+def draw_polygon(img: np.ndarray, vertices, color=RED, thickness=1):
     """
     Draws a closed polygon on an image from a list of vertices
 
     Parameters
     ----------
-    im: input rgb image (np.ndarray)
+    img: input rgb image (np.ndarray)
        
 
     vertices: array of N vertices
@@ -59,20 +59,20 @@ def draw_polygon(im: np.ndarray, vertices, color=RED, thickness=1):
     output_img: output image
         Same shape and type as input image
     """
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
     vertices = vertices.astype(np.int32)
     vertices = vertices.reshape((-1,1,2))
     if thickness == -1:
-        output_img = cv2.fillPoly(im, [vertices], color)
+        output_img = cv2.fillPoly(img, [vertices], color)
     else:
-        output_img = cv2.polylines(im, [vertices], True, color, thickness=thickness)
+        output_img = cv2.polylines(img, [vertices], True, color, thickness=thickness)
     return output_img
 
-def draw_contours(im, contours, color=RED, thickness=1):
+def draw_contours(img, contours, color=RED, thickness=1):
     """
     Takes a set of contours and draws them on an image
 
-    :param im: rgb image (np.ndarray)
+    :param img: rgb image (np.ndarray)
     :param contours: a set of contours produced by find_contours
     :param col: colour -> See colors.py for defined values. Can also pass list of colors same length as contours to specify colour of each contour in order.
     :param thickness: -> thickness of line. -1 will fill enclosed contour
@@ -81,14 +81,14 @@ def draw_contours(im, contours, color=RED, thickness=1):
 
     """
 
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
     if (np.size(np.shape(color)) == 0) | (np.size(np.shape(color)) == 1):
-        im = cv2.drawContours(im, contours, -1, color, thickness)
+        img = cv2.drawContours(img, contours, -1, color, thickness)
     else:
         assert len(color) == len(contours), "If supplying colour for each contour must be same number of colours as contours"
         for i, contour in enumerate(contours):
-            im = cv2.drawContours(im, contour, -1, color[i], thickness)
-    return im
+            img = cv2.drawContours(img, contour, -1, color[i], thickness)
+    return img
 
 def draw_delaunay_tess(img, points, color=RED, thickness=1):
     """
@@ -122,13 +122,13 @@ def draw_delaunay_tess(img, points, color=RED, thickness=1):
     return img
 
 
-def draw_voronoi_cells(im, points):
+def draw_voronoi_cells(img, points):
     """
     Draws the voronoi cells for a set of points on an image
 
     Parameters
     ----------
-    im: input image
+    img: input image
         Any number of channels
 
     points: array of N points
@@ -142,27 +142,27 @@ def draw_voronoi_cells(im, points):
         Same shape and type as input image
     """
 
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
     voro = spatial.Voronoi(points)
     ridge_vertices = voro.ridge_vertices
     new_ridge_vertices = []
     for ridge in ridge_vertices:
         if -1 not in ridge:
             new_ridge_vertices.append(ridge)
-    im = draw_polygons(im,
+    img = draw_polygons(img,
                        voro.vertices[new_ridge_vertices],
                        color=PINK)
-    return im
+    return img
 
 #-----------------------------------------------------------------------------
 #Kept for historical reasons but untested
 #----------------------------------------------------------------------------
 
-def draw_circles_with_scale(im, circles, values, cmap=cm.viridis, thickness=2):
+def draw_circles_with_scale(img, circles, values, cmap=cm.viridis, thickness=2):
     """
     NEEDS DOCSTRING
 
-    :param im:
+    :param img:
     :param circles:
     :param values:
     :param cmap:
@@ -172,28 +172,28 @@ def draw_circles_with_scale(im, circles, values, cmap=cm.viridis, thickness=2):
 
     """
 
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
     for (x, y, r), v in zip(circles, values):
         col = np.multiply(cmap(v), 255)
-        cv2.circle(im, (int(x), int(y)), int(r), col, thickness)
-    return im
+        cv2.circle(img, (int(x), int(y)), int(r), col, thickness)
+    return img
 
-def draw_filled_polygon(im, points, color=RED):
+def draw_filled_polygon(img, points, color=RED):
     """
     Adds a filled polygon to an image
 
-    :param im: np.ndarrary of dtype np.uint8
+    :param img: np.ndarrary of dtype np.uint8
     :param points: N, 2 ndarray of corner points
     :param color: BGR color tuple or images library color
     :return: im: ndarray
     """
-    return cv2.fillPoly(im, np.array([points], dtype=np.int32), color)
+    return cv2.fillPoly(img, np.array([points], dtype=np.int32), color)
 
-def draw_circles(im, circles, color=YELLOW, thickness=2):
+def draw_circles(img, circles, color=YELLOW, thickness=2):
     """
     NEEDS DOCSTRING
 
-    :param im:
+    :param img:
     :param circles:
     :param color:
     :param thickness:
@@ -202,7 +202,7 @@ def draw_circles(im, circles, color=YELLOW, thickness=2):
 
     """
 
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
     assert len(circles) > 0, "Circles must not be empty"
     if len(np.shape(circles)) == 1:
         assert len(circles) == 3, "Circles must contain x, y, and r"
@@ -210,16 +210,16 @@ def draw_circles(im, circles, color=YELLOW, thickness=2):
     else:
         assert np.shape(circles)[1] == 3, "Circles must contain x, y, and r"
     for x, y, rad in circles:
-        cv2.circle(im, (int(x), int(y)), int(rad), color, thickness)
-    return im
+        cv2.circle(img, (int(x), int(y)), int(rad), color, thickness)
+    return img
 
-def draw_polygons(im, polygons, color=RED):
+def draw_polygons(img, polygons, color=RED):
     """
     Draws multiple polygons on an image from a list of polygons
 
     Parameters
     ----------
-    im: input image
+    img: input image
         Any number of channels
 
     polygons: array containing coordinates of polygons
@@ -234,7 +234,7 @@ def draw_polygons(im, polygons, color=RED):
     img: annotated image
         Same shape and type as input image
     """
-    assert len(np.shape(im)) == 3, "Image needs to be 3 channel"
+    assert len(np.shape(img)) == 3, "Image needs to be 3 channel"
     for vertices in polygons:
-        im = draw_polygon(im, vertices, color)
-    return im
+        img = draw_polygon(img, vertices, color)
+    return img

@@ -81,10 +81,10 @@ def find_circles(img: np.ndarray, min_dist: int=5, p1: int=70, p2: int=10, min_r
     return np.squeeze(circles)
 
 
-def find_connected_components(thresh_img: np.ndarray, connectivity: int=4, option=cv2.CV_32S):
+def find_connected_components(bw_img: np.ndarray, connectivity: int=4, option=cv2.CV_32S):
     """Find binary collections of pixels that are connected together.
 
-    :param thresh_img: thresholded image
+    :param bw_img: thresholded image
     :param connectivity: can be 4 or 8
     :param option:
 
@@ -104,7 +104,7 @@ def find_connected_components(thresh_img: np.ndarray, connectivity: int=4, optio
     The row in this matrix corresponds to the label number.
     """
 
-    output = cv2.connectedComponentsWithStats(thresh_img, connectivity, option)
+    output = cv2.connectedComponentsWithStats(bw_img, connectivity, option)
 
     # num_labels = output[0]
     labels = output[1]
