@@ -1,62 +1,52 @@
-brotlipy @ file:///D:/bld/brotlipy_1666764795627/work
-certifi==2022.12.7
-cffi @ file:///D:/bld/cffi_1671179520384/work
-charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1678108872112/work
-colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
-contourpy==1.0.7
-coverage @ file:///D:/bld/coverage_1680817857165/work
-cryptography @ file:///D:/bld/cryptography-split_1679811479017/work
-cycler==0.11.0
-decorator==4.4.2
-exceptiongroup @ file:///home/conda/feedstock_root/build_artifacts/exceptiongroup_1678703645500/work
-ffmpeg-python==0.2.0
-filehandling @ git+https://github.com/MikeSmithLabTeam/filehandling@4e0fc0e7eed429fbaf5bb763d3d5a387d426145b
-fonttools==4.39.3
-future==0.18.3
-idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1663625384323/work
-imageio==2.27.0
-imageio-ffmpeg==0.4.8
-importlib-metadata @ file:///home/conda/feedstock_root/build_artifacts/importlib-metadata_1681101609140/work
-iniconfig @ file:///home/conda/feedstock_root/build_artifacts/iniconfig_1673103042956/work
-kiwisolver==1.4.4
-matplotlib==3.7.1
-mkl-service==2.4.0
-moviepy==1.0.3
-numexpr @ file:///C:/ci_311_rebuilds/numexpr_1679001276672/work
-numpy @ file:///D:/bld/numpy_1675642697443/work
-opencv-python==4.7.0
-packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1681337016113/work
-pexpect @ file:///home/conda/feedstock_root/build_artifacts/pexpect_1667297516076/work
-Pillow==9.5.0
-platformdirs @ file:///home/conda/feedstock_root/build_artifacts/platformdirs_1679871349196/work
-pluggy @ file:///home/conda/feedstock_root/build_artifacts/pluggy_1667232663820/work
-ply==3.11
-pooch @ file:///home/conda/feedstock_root/build_artifacts/pooch_1679580333621/work
-proglog==0.1.10
-ptyprocess @ file:///home/conda/feedstock_root/build_artifacts/ptyprocess_1609419310487/work/dist/ptyprocess-0.7.0-py2.py3-none-any.whl
-py-cpuinfo @ file:///home/conda/feedstock_root/build_artifacts/py-cpuinfo_1666774466606/work
-pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1636257122734/work
-pyOpenSSL @ file:///home/conda/feedstock_root/build_artifacts/pyopenssl_1680037383858/work
-pyparsing==3.0.9
-PyQt5==5.15.7
-PyQt5-sip @ file:///D:/bld/pyqt-split_1674666659115/work/pyqt_sip
-PySocks @ file:///D:/bld/pysocks_1661604991356/work
-pytest==7.3.0
-pytest-cov==4.0.0
-python-dateutil==2.8.2
-pywin32==304
-qimage2ndarray==1.10.0
-qtwidgets @ git+https://github.com/mikesmithlabteam/qtwidgets@96697549d82bdeaa256a31708abfc85bc48981af
-requests @ file:///home/conda/feedstock_root/build_artifacts/requests_1680286922386/work
-scipy==1.10.1
-sip @ file:///D:/bld/sip_1681161117371/work
-six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
-slicerator==1.1.0
-tables==3.8.0
-toml @ file:///home/conda/feedstock_root/build_artifacts/toml_1604308577558/work
-tomli @ file:///home/conda/feedstock_root/build_artifacts/tomli_1644342247877/work
-tqdm==4.65.0
-typing_extensions @ file:///home/conda/feedstock_root/build_artifacts/typing_extensions_1678559861143/work
-urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1678635778344/work
-win-inet-pton @ file:///D:/bld/win_inet_pton_1667051142467/work
-zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1677313463193/work
+alabaster==0.7.12
+Babel==2.9.1
+bleach==3.3.0
+certifi==2023.7.22
+cffi==1.13.2
+chardet==3.0.4
+cryptography==41.0.4
+cycler==0.10.0
+docutils==0.15.2
+ffmpeg==1.4
+idna==2.9
+imagesize==1.2.0
+importlib-metadata==1.2.0
+jeepney==0.4.1
+Jinja2==2.11.3
+keyring==20.0.0
+kiwisolver==1.1.0
+MarkupSafe==1.1.1
+matplotlib==3.2.1
+more-itertools==8.0.2
+numpy==1.22.0
+opencv-python==4.2.0.32
+packaging==20.3
+Pillow==9.3.0
+pkginfo==1.5.0.1
+pycparser==2.19
+Pygments==2.15.0
+pyparsing==2.4.6
+python-dateutil==2.8.1
+pytz==2019.3
+readme-renderer==24.0
+requests==2.23.0
+requests-toolbelt==0.9.1
+scipy==1.10.0
+SecretStorage==3.1.1
+sh==1.12.14
+six==1.14.0
+slicerator==1.0.0
+snowballstemmer==2.0.0
+Sphinx==2.4.4
+sphinx-rtd-theme==0.4.3
+sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-htmlhelp==1.0.3
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-serializinghtml==1.1.4
+tk==0.1.0
+twine==3.1.1
+urllib3==1.26.5
+webencodings==0.5.1
+zipp==0.6.0
