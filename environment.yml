@@ -1,4 +1,4 @@
-name: pt
+name: labvision
 channels:
   - defaults
 dependencies:
@@ -102,4 +102,4 @@ dependencies:
       - opencv-python==4.8.0.76
       - qimage2ndarray==1.10.0
       - qtwidgets==0.1
-prefix: C:\Users\mikei\miniconda3\envs\pt
+prefix: C:\Users\mikei\miniconda3\envs\labvision

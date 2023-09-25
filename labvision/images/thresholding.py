@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def threshold(im, value=None, mode=cv2.THRESH_BINARY, configure=False):
+def threshold(im, value=None, invert=False, configure=False):
     """
     Thresholds an image
 
@@ -25,18 +25,18 @@ def threshold(im, value=None, mode=cv2.THRESH_BINARY, configure=False):
     """
     
     if configure:
-        param_dict = {'value':[value,0,255,1],'mode':[mode,0,1,1]}
+        param_dict = {'value':[value,0,255,1],'invert':[int(invert),0,1,1]}
         gui = ConfigGui(im, threshold, param_dict)
         thresh_img = threshold(im, **gui.reduced_dict)
         gui.app.quit()
     else:
         if value is None:
-            mode = mode + cv2.THRESH_OTSU
-        thresh_img = cv2.threshold(im, value, 255, mode)[1]
+            invert = invert + cv2.THRESH_OTSU
+        thresh_img = cv2.threshold(im, value, 255, int(invert))[1]
     return thresh_img
 
 
-def adaptive_threshold(im, block_size=10, constant=5, mode=cv2.THRESH_BINARY, configure=False):
+def adaptive_threshold(im, block_size=10, constant=5, invert=False, configure=False):
     """
     Performs an adaptive threshold on an image
 
@@ -56,8 +56,9 @@ def adaptive_threshold(im, block_size=10, constant=5, mode=cv2.THRESH_BINARY, co
 
     constant: subtracted from the weighted sum
     """
+
     if configure:
-        param_dict = {'block_size':[block_size,1,block_size*25,2],'constant':[constant,1,constant*25,2],'mode':[mode,0,1,1]}
+        param_dict = {'block_size':[block_size,1,block_size*25,2],'constant':[constant,1,constant*25,2],'invert':[int(invert),0,1,1]}
         gui = ConfigGui(im, adaptive_threshold, param_dict)
         out = adaptive_threshold(im, **gui.reduced_dict)
         gui.app.quit()
@@ -66,7 +67,7 @@ def adaptive_threshold(im, block_size=10, constant=5, mode=cv2.THRESH_BINARY, co
             im,
             255,
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            mode,
+            int(invert),
             block_size,
             constant
         )
@@ -128,7 +129,7 @@ def inrange(im, bottom_tuple, top_tuple):
 
 
 def watershed(img, watershed_threshold=0.5, block_size=5, constant=0,
-              mode=cv2.THRESH_BINARY):
+              invert=False):
     d = depth(img)
     if d == 3:
         grayscale_img = bgr_to_gray(img)
@@ -138,7 +139,7 @@ def watershed(img, watershed_threshold=0.5, block_size=5, constant=0,
             img)
 
     binary_img = adaptive_threshold(grayscale_img, block_size=block_size,
-                                    constant=constant, mode=mode)
+                                    constant=constant, invert=invert)
 
     # noise removal
     kernel = np.ones((3, 3), np.uint8)
