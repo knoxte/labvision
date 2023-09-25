@@ -6,8 +6,10 @@ from qtwidgets.config import ConfigGui
 from labvision.images.colors import bgr_to_gray, gray_to_bgr
 
 __all__ = [
+    'brightness_contrast',
+    'gamma',
     'watershed',
-    'distance_transform',
+    'distance',
     'absolute_diff'
 ]
 
@@ -71,7 +73,7 @@ def gamma(img, gamma=1.0, configure=False):
         gamma_img = cv2.LUT(image, table)
     return gamma_img
 
-def distance_transform(img):
+def distance(img):
     """
     Calculates the distance to the closest zero pixel for each pixel.
 
