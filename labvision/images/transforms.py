@@ -11,6 +11,66 @@ __all__ = [
     'absolute_diff'
 ]
 
+def brightness_contrast(img, brightness=0, contrast=0, configure=False):
+    """Brightness and Contrast control
+
+    This is implemented as g(x) = contrast * f(x) + brightness
+
+    but with checks to make sure the values don't fall outside 0-255"""
+    if configure:
+        param_dict = {'brightness':[brightness,0,255,0.001], 'contrast':[contrast,-100,100,0.001]}
+        gui = ConfigGui(img, gamma, param_dict)
+        brightness_contrast_img = brightness_contrast(img, **gui.reduced_dict)
+        gui.app.quit()
+    else:
+        brightness_contrast_img =  cv2.convertScaleAbs(frame, alpha=parameters['contrast'], beta=parameters['brightness'])
+    return brightness_contrast_img
+
+def gamma(img, gamma=1.0, configure=False):
+    '''
+    Apply look up table to image with power gamma
+
+    Notes
+    -----
+    This generates a lookup table which maps the values 0-255 to 0-255
+    however not in a linear way. The mapping follows a power law
+    with exponent gamma/100.0.
+
+    gamma
+        single float can be positive or negative. The true value applied is the displayed value / 100.
+
+    Args
+    ----
+    frame
+        This is must be a grayscale / single colour channel image
+    parameters
+        Nested dictionary like object (same as .param files or output from general.param_file_creator.py
+    call_num
+        Usually None but if multiple calls are made modifies method name with get_method_key
+
+    Returns
+    -------
+        grayscale image
+
+    '''
+    if configure:
+        param_dict = {'gamma':[gamma,0,50,0.001]}
+        gui = ConfigGui(img, gamma, param_dict)
+        gamma_img = gamma(img, **gui.reduced_dict)
+        gui.app.quit()
+    else:
+        # build a lookup table mapping the pixel values [0, 255] to
+        # their adjusted gamma values
+        if gamma == 0:
+            gamma = 0.000001
+        invGamma = 1.0 / gamma
+
+        table = np.array([((i / 255.0) ** invGamma) *
+                        255 for i in np.arange(0, 256)]).astype("uint8")
+
+        gamma_img = cv2.LUT(image, table)
+    return gamma_img
+
 def distance_transform(img):
     """
     Calculates the distance to the closest zero pixel for each pixel.
