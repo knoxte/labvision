@@ -1,6 +1,6 @@
 from ast import Assert
 import pytest
-from labvision.images.smoothing import gaussian_blur, median_blur
+from labvision.images.blurs import gaussian_blur, median_blur
 from tests import binary_single_circle
 
 
