@@ -37,11 +37,13 @@ GREEN = (0, 128, 0)
 MAROON = (0, 0, 128)
 
 
-
-def bgr_to_gray(im):
-    return cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-
-def gray_to_bgr(im):
-    return cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
+def bgr_to_gray(img):
+    if np.shape(img)[2] == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return img
 
 
+def gray_to_bgr(img):
+    if np.shape(img)[2] == 1:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    return img
