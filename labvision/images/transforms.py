@@ -25,7 +25,7 @@ def brightness_contrast(img, brightness=0, contrast=0, configure=False):
         brightness_contrast_img = brightness_contrast(img, **gui.reduced_dict)
         gui.app.quit()
     else:
-        brightness_contrast_img =  cv2.convertScaleAbs(frame, alpha=parameters['contrast'], beta=parameters['brightness'])
+        brightness_contrast_img =  cv2.convertScaleAbs(img, alpha=contrast, beta=brightness)
     return brightness_contrast_img
 
 def gamma(gray_img, gamma=1.0, configure=False):
