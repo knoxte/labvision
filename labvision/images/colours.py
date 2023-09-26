@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 __all__ = [
     'BLUE',
@@ -50,7 +51,9 @@ def gray_to_bgr(img):
 
 
 def _colour(img):
-    if np.size(np.shape(img)[2] == 3):
+    print(np.size(np.shape(img)))
+    if np.size(np.shape(img)) == 3:
         return True
     else:
         return False
+
