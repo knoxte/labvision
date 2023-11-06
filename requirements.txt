@@ -18,9 +18,11 @@ kiwisolver==1.1.0
 MarkupSafe==1.1.1
 matplotlib==3.2.1
 more-itertools==8.0.2
+moviepy==1.0.3
 numpy==1.22.0
 opencv-python==4.2.0.32
 packaging==20.3
+pexpect==4.8.0
 Pillow==10.0.1
 pkginfo==1.5.0.1
 pycparser==2.19
@@ -28,6 +30,7 @@ Pygments==2.15.0
 pyparsing==2.4.6
 python-dateutil==2.8.1
 pytz==2019.3
+pywin32==306
 readme-renderer==24.0
 requests==2.23.0
 requests-toolbelt==0.9.1
