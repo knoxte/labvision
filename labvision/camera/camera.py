@@ -141,7 +141,8 @@ def get_cameras_on_windows(show=True):
     
     cam_objs = []
 
-    print('Following cameras are plugged in:')
+    if show:
+        print('Following cameras are plugged in:')
     for usb in wmi.InstancesOf("Win32_USBHub"):
         if show:
             print(usb.Name)
