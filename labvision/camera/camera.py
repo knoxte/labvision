@@ -38,7 +38,7 @@ class Camera:
     '''
     def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
         
-        cam_num, cam_type = get_camera(cam_num, cam_type)
+        cam_num, cam_type = get_camera(cam_num, cam_type, show=False)
         
         self.cam = cv2.VideoCapture(cam_num, apiPreference=cam_type.value['apipreference'])#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
