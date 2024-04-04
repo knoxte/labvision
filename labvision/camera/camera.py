@@ -161,11 +161,11 @@ def get_cameras_on_linux():
     
     return newlist
 
-def get_camera(cam_num : Optional[int], camtype : Optional[CameraType]):
+def get_camera(cam_num : Optional[int], camtype : Optional[CameraType], show=True):
     """Looks to see whether camtype exists on system. If it does
     returns the index used in OpenCV else raises error"""    
     if os.name == 'nt':
-        cameras = get_cameras_on_windows()
+        cameras = get_cameras_on_windows(show=show)
     else:
         cameras = get_cameras_on_linux()
 
