@@ -38,7 +38,7 @@ class Camera:
     '''
     def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
         
-        cam_num, cam_type = get_camera(cam_num, cam_type)
+        cam_num, cam_type = get_camera(cam_num, cam_type, show=False)
         
         self.cam = cv2.VideoCapture(cam_num, apiPreference=cam_type.value['apipreference'])#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
@@ -141,7 +141,8 @@ def get_cameras_on_windows(show=True):
     
     cam_objs = []
 
-    print('Following cameras are plugged in:')
+    if show:
+        print('Following cameras are plugged in:')
     for usb in wmi.InstancesOf("Win32_USBHub"):
         if show:
             print(usb.Name)
@@ -161,11 +162,11 @@ def get_cameras_on_linux():
     
     return newlist
 
-def get_camera(cam_num : Optional[int], camtype : Optional[CameraType]):
+def get_camera(cam_num : Optional[int], camtype : Optional[CameraType], show=True):
     """Looks to see whether camtype exists on system. If it does
     returns the index used in OpenCV else raises error"""    
     if os.name == 'nt':
-        cameras = get_cameras_on_windows()
+        cameras = get_cameras_on_windows(show=show)
     else:
         cameras = get_cameras_on_linux()
 
