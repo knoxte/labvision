@@ -51,7 +51,6 @@ def gray_to_bgr(img):
 
 
 def _colour(img):
-    print(np.size(np.shape(img)))
     if np.size(np.shape(img)) == 3:
         return True
     else:
