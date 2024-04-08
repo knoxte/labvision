@@ -95,7 +95,13 @@ class Displayer:
         cv2.imshow(self.window_name, img)
         if cv2.waitKey(100) & 0xFF == ord('q'):
             self.active = False
-            cv2.destroyAllWindows()
+            self.close_window()
+    
+    def close_window(self):
+        try:
+            cv2.destroyWindow(self.window_name)
+        except:
+            print('Window already closed')
 
 
 def read_img(filepath, grayscale=False, alpha=False):

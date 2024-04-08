@@ -4,7 +4,7 @@ import sys
 import os
 
 from .camera_config import CameraType, CameraProperty
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Boolean
 
 if os.name == 'nt':
     import win32com.client
@@ -36,13 +36,14 @@ class Camera:
     img = cam.get_frame()
 
     '''
-    def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, ):
+    def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, snap : Boolean=True ):
         
         cam_num, cam_type = get_camera(cam_num, cam_type, show=False)
         
         self.cam = cv2.VideoCapture(cam_num, apiPreference=cam_type.value['apipreference'])#cv2.CAP_DSHOW # cv2.CAP_MSMF seems to break camera
         self.set = self.cam.set
         self.get = self.cam.get
+        self.snap = snap
 
         if frame_size is None:
             self.set_property(property=CameraProperty.WIDTH, value=cam_type.value['width'])
@@ -62,6 +63,8 @@ class Camera:
     def get_frame(self):
         """Get a frame from the camera and return"""
         ret, frame = self.cam.read()
+        if self.snap:
+            ret, frame = self.cam.read()    
         if not ret:
             raise CamReadError(self.cam, frame)
         return frame
