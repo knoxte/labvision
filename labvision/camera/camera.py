@@ -44,6 +44,18 @@ class Camera:
         self.set = self.cam.set
         self.get = self.cam.get
 
+        if frame_size is None:
+            self.set_property(property=CameraProperty.WIDTH, value=cam_type.value['width'])
+            self.set_property(property=CameraProperty.HEIGHT, value=cam_type.value['height'])
+        else:
+            self.set_property(property=CameraProperty.WIDTH, value=frame_size[0])
+            self.set_property(property=CameraProperty.HEIGHT, value=frame_size[1])
+        
+        if fps is None:
+            self.set_property(property=CameraProperty.FPS, value=cam_type.value['fps'])
+        else:
+            self.set_property(property=CameraProperty.FPS, value=fps)
+
         if not self.cam.isOpened():
             raise CamReadError(self.cam, None)
 
