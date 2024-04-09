@@ -2,6 +2,7 @@ from types import NoneType
 import cv2
 import sys
 import os
+import numpy as np
 
 from .camera_config import CameraType, CameraProperty
 from typing import Optional, Tuple, Boolean
@@ -36,7 +37,7 @@ class Camera:
     img = cam.get_frame()
 
     '''
-    def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, snap : Boolean=True ):
+    def __init__(self, cam_num=None, cam_type : Optional[CameraType] = None, frame_size : Tuple[int, int, int] = None, fps : Optional[float] = None, snap : bool=True):
         
         cam_num, cam_type = get_camera(cam_num, cam_type, show=False)
         
@@ -60,11 +61,18 @@ class Camera:
         if not self.cam.isOpened():
             raise CamReadError(self.cam, None)
 
-    def get_frame(self):
+    def get_frame(self, retry=3):
         """Get a frame from the camera and return"""
         ret, frame = self.cam.read()
+        #If you just want to snap an image rather than record a video, we take the second frame by default as sometimes we will get a historical pic from buffer.
+        #Sometimes doing this we get a black first frame so retry until sucessful.
         if self.snap:
-            ret, frame = self.cam.read()    
+            ret, frame = self.cam.read()
+            if not ret:
+                for _ in range(retry):
+                    ret, frame = self.cam.read()
+                    if ret and np.sum(frame) > 0:
+                        break
         if not ret:
             raise CamReadError(self.cam, frame)
         return frame
