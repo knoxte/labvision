@@ -19,7 +19,6 @@ setuptools.setup(
         'opencv-python',
         'numpy',
         'matplotlib',
-        'pywin32',
         'pexpect',
         'pillow',
         'scipy',
